@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.Transforms.Image;
+using System.Drawing;
 using backend.Data;
 using backend.Models;
 
@@ -49,16 +53,20 @@ namespace backend.Contollers
             string filePath = Path.Combine(uploadsFolder, fileName);
 
             // Copy Image to Filesystem
-            using FileStream stream = new FileStream(filePath, FileMode.Create);
-            await request.File.CopyToAsync(stream);
+            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+            {
+                await request.File.CopyToAsync(stream);
+            }
 
-            // Do the Embedding Here
+            // Generate Image Embedding
+            float[] embedding = GetImageEmbedding(filePath);
+            string serializedEmbedding = System.Text.Json.JsonSerializer.Serialize(embedding);
 
             Image image = new Image
             {
                 Path = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}",
-                Artwork_Id = request.Artwork_Id
-                // Embedding = ...
+                Artwork_Id = request.Artwork_Id,
+                Embedding = serializedEmbedding
             };
 
             _context.Image.Add(image);
@@ -66,6 +74,55 @@ namespace backend.Contollers
 
             return Ok(new { message = "Success" });
         }
-    }
 
+        // TODO: Move this to a Service later
+        public class ImageEmbedding
+        {
+            [VectorType(2048)]
+            public float[] resnetv17_dense0_fwd { get; set; } = null!;
+        }
+
+        private class ImageData
+        {
+            public string? ImagePath { get; set; }
+        }
+
+        private float[] GetImageEmbedding(string imagePath)
+        {
+            string modelPath = Path.Combine(AppContext.BaseDirectory, "Models", "resnet50-v1-7.onnx");
+            MLContext mlContext = new MLContext();
+
+            List<ImageData> data = new List<ImageData>
+            {
+                new ImageData { ImagePath = imagePath }
+            };
+            IDataView dataView = mlContext.Data.LoadFromEnumerable(data);
+
+            var pipeline = mlContext.Transforms.LoadImages(
+                outputColumnName: "data",
+                imageFolder: "",
+                inputColumnName: nameof(ImageData.ImagePath)
+            )
+            .Append(mlContext.Transforms.ResizeImages(
+                outputColumnName: "data",
+                imageWidth: 224,
+                imageHeight: 224,
+                inputColumnName: "data"))
+            .Append(mlContext.Transforms.ExtractPixels("data"))
+            .Append(mlContext.Transforms.ApplyOnnxModel(
+                modelFile: modelPath,
+                outputColumnNames: new[] { "resnetv17_dense0_fwd" },
+                inputColumnNames: new[] { "data" }
+            ));
+
+            var transformer = pipeline.Fit(dataView);
+            var transformed = transformer.Transform(dataView);
+
+            ImageEmbedding embeddings = mlContext.Data
+                .CreateEnumerable<ImageEmbedding>(transformed, reuseRowObject: false)
+                .First();
+
+            return embeddings.resnetv17_dense0_fwd;
+        }
+    }
 }

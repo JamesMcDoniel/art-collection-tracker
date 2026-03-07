@@ -39,6 +39,9 @@ backend/.env
 backend/database.db
 backend/database.db*
 
+# ONNX Model
+backend/Models/resnet50-v1-7.onnx
+
 # Uploaded Images
 backend/wwwroot/uploads/*
 
