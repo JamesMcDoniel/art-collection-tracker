@@ -3,6 +3,7 @@ import { useState } from 'react';
 const App = () => {
     const [title, setTitle] = useState('');
     const [file, setFile] = useState(null);
+    const [paths, setPaths] = useState([]);
     const exampleArtworkId = 1; // For testing purposes
 
     const submitArtwork = async (e) => {
@@ -59,6 +60,28 @@ const App = () => {
         }
     };
 
+    const getImages = async () => {
+        try {
+            const res = await fetch('/api/image');
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message);
+            }
+
+            console.log(data);
+
+            setPaths([
+                data.image,
+                ...data.recommendations.map(
+                    (recommendation) => recommendation.path
+                )
+            ]);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     return (
         <main>
             <form onSubmit={submitArtwork}>
@@ -87,6 +110,27 @@ const App = () => {
                     alt="Upload Preview"
                 />
             ) : null}
+            <hr />
+            <button
+                type="button"
+                onClick={getImages}
+            >
+                Generate Random + Similar Image
+            </button>
+            {paths.length > 0
+                ? paths.map((path) => (
+                      <img
+                          key={path}
+                          src={path}
+                          alt=""
+                          style={{
+                              display: 'block',
+                              height: '100%',
+                              width: '100px'
+                          }}
+                      />
+                  ))
+                : null}
         </main>
     );
 };

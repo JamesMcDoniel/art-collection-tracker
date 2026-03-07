@@ -75,7 +75,55 @@ namespace backend.Contollers
             return Ok(new { message = "Success" });
         }
 
-        // TODO: Move this to a Service later
+        [HttpGet]
+        public async Task<IActionResult> GetRecommendedImages()
+        {
+            List<Image> images = _context.Image.ToList();
+            int numResults = 1; // This will eventually be a parameter
+
+            if (images.Count == 0)
+            {
+                return NotFound(new { message = "No Images Found" });
+            }
+
+            // Generate a random number, and use it to pick a random image
+            Random randomNumber = new Random();
+            Image randomImage = images[randomNumber.Next(images.Count)];
+
+            // Deserialize the stored Embedding
+            float[] chosenEmbedding = System.Text.Json.JsonSerializer
+                .Deserialize<float[]>(randomImage.Embedding)!;
+
+            // Parse other images' embeddings and perform cosine similarity
+            var similarImages = images
+                .Where(image => image.Id != randomImage.Id)
+                .Select(image =>
+                {
+                    float[] currentEmbedding = System.Text.Json.JsonSerializer
+                        .Deserialize<float[]>(image.Embedding)!;
+
+                    return new
+                    {
+                        Image = image,
+                        Score = CosignSimilarity(chosenEmbedding, currentEmbedding)
+                    };
+                })
+                .OrderByDescending(image => image.Score)
+                .Take(numResults)
+                .Select(image => new { image.Image.Path })
+                .ToList();
+
+            // Instead of just the File Paths, this will eventually return the Path
+            // plus part of the Image object, for each of the selected items.
+
+            return Ok(new
+            {
+                Image = randomImage.Path,
+                Recommendations = similarImages
+            });
+        }
+
+        // TODO: Move these to Services later
         public class ImageEmbedding
         {
             [VectorType(2048)]
@@ -123,6 +171,22 @@ namespace backend.Contollers
                 .First();
 
             return embeddings.resnetv17_dense0_fwd;
+        }
+
+        private float CosignSimilarity(float[] a, float[] b)
+        {
+            float dot = 0f;
+            float normA = 0f;
+            float normB = 0f;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                dot += a[i] * b[i];
+                normA += a[i] * a[i];
+                normB += b[i] * b[i];
+            }
+
+            return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
         }
     }
 }
