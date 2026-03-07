@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using backend.Data;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Create CORS policy to connect with React frontend (http://localhost:5173)
@@ -11,6 +14,9 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
+// Create Database connection
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=database.db"));
 
 WebApplication app = builder.Build();
 

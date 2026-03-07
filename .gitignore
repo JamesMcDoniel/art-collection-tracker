@@ -35,6 +35,9 @@ frontend/*.sw?
 # dotenv files
 backend/.env
 
+# SQLite Database file
+backend/database.db
+
 # User-specific files
 backend/*.rsuser
 backend/*.suo
