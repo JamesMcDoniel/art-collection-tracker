@@ -1,35 +1,94 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+    const [title, setTitle] = useState('');
+    const [file, setFile] = useState(null);
+    const exampleArtworkId = 1; // For testing purposes
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    const submitArtwork = async (e) => {
+        e.preventDefault();
 
-export default App
+        if (title.length === 0) return;
+
+        try {
+            const res = await fetch('/api/artwork', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title
+                })
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message);
+            }
+
+            console.log(data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const submitImage = async (e) => {
+        e.preventDefault();
+
+        if (!file) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('artwork_id', exampleArtworkId);
+
+            const res = await fetch('/api/image', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message);
+            }
+
+            console.log(data.message);
+            setFile(null);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    return (
+        <main>
+            <form onSubmit={submitArtwork}>
+                <label htmlFor="artwork-title">Title:</label>
+                <input
+                    id="artwork-title"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                />
+                <button type="submit">Submit</button>
+            </form>
+            <hr />
+            <form onSubmit={submitImage}>
+                <label htmlFor="image-upload">Upload:</label>
+                <input
+                    id="image-upload"
+                    type="file"
+                    onChange={(e) => setFile(e.target.files[0])}
+                />
+                <button type="submit">Submit</button>
+            </form>
+            {file ? (
+                <img
+                    src={URL.createObjectURL(file)}
+                    alt="Upload Preview"
+                />
+            ) : null}
+        </main>
+    );
+};
+
+export default App;

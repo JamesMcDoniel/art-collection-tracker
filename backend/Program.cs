@@ -18,9 +18,20 @@ builder.Services.AddCors(options =>
 // Create Database connection
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=database.db"));
 
+// Configure Controllers
+builder.Services.AddControllers();
+
 WebApplication app = builder.Build();
 
 // Enable CORS policy
 app.UseCors("dev");
+
+// Enable Controllers
+app.MapControllers();
+
+// Will be used eventually to serve built React frontend
+// app.UseDefaultFiles();
+app.UseStaticFiles();
+// app.MapFallbackToFile("index.html");
 
 app.Run();

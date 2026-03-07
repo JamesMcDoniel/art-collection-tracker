@@ -35,8 +35,12 @@ frontend/*.sw?
 # dotenv files
 backend/.env
 
-# SQLite Database file
+# SQLite Database files
 backend/database.db
+backend/database.db*
+
+# Uploaded Images
+backend/wwwroot/uploads/*
 
 # User-specific files
 backend/*.rsuser
