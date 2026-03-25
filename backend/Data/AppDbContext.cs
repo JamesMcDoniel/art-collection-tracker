@@ -7,6 +7,10 @@ namespace backend.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        public DbSet<User> User { get; set; }
+        public DbSet<Role> Role { get; set; }
+        public DbSet<RefreshToken> RefreshToken { get; set; }
+
         public DbSet<Artwork> Artwork { get; set; }
         public DbSet<Collection> Collection { get; set; }
         public DbSet<Category> Category { get; set; }
@@ -19,13 +23,70 @@ namespace backend.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Ensures Unique Constraint
+            // Unique Constraints
+            modelBuilder.Entity<User>()
+                .HasIndex(user => user.Username)
+                .IsUnique();
+
+            modelBuilder.Entity<Role>()
+                .HasIndex(role => role.Title)
+                .IsUnique();
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(refreshToken => refreshToken.Token)
+                .IsUnique();
+
             modelBuilder.Entity<Artwork>()
                 .HasIndex(artwork => artwork.Asset_Num)
                 .IsUnique();
 
-            // If a record in one of the lookup tables is deleted
-            // (Collection, Category, etc.), set any affected fields in Artwork to null.
+            modelBuilder.Entity<Collection>()
+                .HasIndex(collection => collection.Title)
+                .IsUnique();
+
+            modelBuilder.Entity<Category>()
+                .HasIndex(category => category.Title)
+                .IsUnique();
+
+            modelBuilder.Entity<Medium>()
+                .HasIndex(medium => medium.Type)
+                .IsUnique();
+
+            modelBuilder.Entity<Location>()
+                .HasIndex(location => location.Location_Name)
+                .IsUnique();
+
+            modelBuilder.Entity<Loan_Status>()
+                .HasIndex(loanStatus => loanStatus.Status)
+                .IsUnique();
+
+            // I'll still add Artist & Donor here for Indexes to speed up lookup,
+            // but they won't be Unique, since names aren't necessarily always
+            // unique.
+            modelBuilder.Entity<Artist>()
+                .HasIndex(artist => artist.Name);
+
+            modelBuilder.Entity<Donor>()
+                .HasIndex(donor => donor.Name);
+
+            // All Users must have a Role. Restrict prevents a parent record
+            // from being deleted while there are still dependent child records
+            // linked to it.
+            modelBuilder.Entity<User>()
+                .HasOne(user => user.Role)
+                .WithMany(role => role.Users)
+                .HasForeignKey(user => user.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Remove all of a User's refreshTokens if the User is deleted
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(refreshToken => refreshToken.User)
+                .WithMany(user => user.RefreshTokens)
+                .HasForeignKey(refreshToken => refreshToken.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // When a lookup table record is deleted, set the associated field
+            // in Artwork to null.
             modelBuilder.Entity<Artwork>()
                 .HasOne(artwork => artwork.Collection)
                 .WithMany(collection => collection.Artworks)
@@ -68,6 +129,14 @@ namespace backend.Data
                 .WithMany(artwork => artwork.Images)
                 .HasForeignKey(image => image.Artwork_Id)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Seed Role Table
+            modelBuilder.Entity<Role>().HasData(
+                new Role { Id = 1, Title = "Curator" },
+                new Role { Id = 2, Title = "Facilities" },
+                new Role { Id = 3, Title = "IT" },
+                new Role { Id = 4, Title = "Guest" }
+            );
         }
     }
 }
