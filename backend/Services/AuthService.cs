@@ -14,7 +14,7 @@ public class AuthService : IAuthService
         _tokenService = tokenService;
     }
 
-    public async Task<TokenDto> Login(LoginDto dto)
+    public async Task<AuthDto> Login(LoginDto dto)
     {
         // Find first User whose Username matches the submitted one
         var user = await _context.User
@@ -37,11 +37,13 @@ public class AuthService : IAuthService
         user.RefreshTokens.Add(refreshToken);
         await _context.SaveChangesAsync();
 
-        // Return the new Tokens
-        return new TokenDto
+        // Return the new Tokens and User information
+        return new AuthDto
         {
             Token = token,
-            RefreshToken = refreshToken.Token
+            RefreshToken = refreshToken.Token,
+            Username = user.Username,
+            Role = user.Role!.Title
         };
     }
 
@@ -72,7 +74,7 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<TokenDto> RefreshToken(string token)
+    public async Task<AuthDto> RefreshToken(string token)
     {
         // Search the database for the given token
         var refreshToken = await _context.RefreshToken
@@ -97,11 +99,13 @@ public class AuthService : IAuthService
         refreshToken.User!.RefreshTokens.Add(newRefreshToken);
         await _context.SaveChangesAsync();
 
-        // Return the new token pair
-        return new TokenDto
+        // Return the new token pair and User information
+        return new AuthDto
         {
             Token = jwt,
-            RefreshToken = newRefreshToken.Token
+            RefreshToken = newRefreshToken.Token,
+            Username = refreshToken.User.Username,
+            Role = refreshToken.User.Role!.Title
         };
     }
 

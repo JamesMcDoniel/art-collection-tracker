@@ -1,7 +1,7 @@
 public interface IAuthService
 {
-    Task<TokenDto> Login(LoginDto dto);
+    Task<AuthDto> Login(LoginDto dto);
     Task Register(RegisterDto dto);
-    Task<TokenDto> RefreshToken(string token);
+    Task<AuthDto> RefreshToken(string token);
     Task RevokeRefreshToken(string token);
 }

@@ -51,7 +51,11 @@ namespace backend.Controllers
                     Expires = DateTime.UtcNow.AddDays(8)
                 });
 
-                return Ok();
+                return Ok(new SessionDto
+                {
+                    Username = result.Username,
+                    Role = result.Role
+                });
             }
             catch (Exception exception)
             {
@@ -129,7 +133,11 @@ namespace backend.Controllers
                     Expires = DateTime.UtcNow.AddDays(8)
                 });
 
-                return Ok();
+                return Ok(new SessionDto
+                {
+                    Username = result.Username,
+                    Role = result.Role
+                });
             }
             catch (Exception exception)
             {
