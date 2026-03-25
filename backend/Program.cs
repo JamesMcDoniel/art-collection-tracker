@@ -49,6 +49,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Configure CSRF Antiforgery
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
+
 builder.Services.AddAuthorization();
 
 // Create Database connection
@@ -65,6 +71,10 @@ WebApplication app = builder.Build();
 
 // Enable CORS policy
 app.UseCors("dev");
+
+// Enable Authentication and Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Enable Controllers
 app.MapControllers();

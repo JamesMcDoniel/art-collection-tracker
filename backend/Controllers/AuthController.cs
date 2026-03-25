@@ -1,3 +1,5 @@
+using backend.Filters;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
@@ -6,10 +8,12 @@ namespace backend.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
+        private readonly IAntiforgery _antiforgery;
         private readonly IAuthService _authService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAntiforgery antiforgery, IAuthService authService)
         {
+            _antiforgery = antiforgery;
             _authService = authService;
         }
 
@@ -18,8 +22,11 @@ namespace backend.Controllers
         {
             try
             {
+                // Get Auth and CSRF Tokens
                 var result = await _authService.Login(dto);
+                var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
 
+                // Attached the Tokens to Cookies
                 Response.Cookies.Append("accessToken", result.Token, new CookieOptions
                 {
                     HttpOnly = true,
@@ -36,6 +43,14 @@ namespace backend.Controllers
                     Expires = DateTime.UtcNow.AddDays(7)
                 });
 
+                Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+                {
+                    HttpOnly = false, // We want frontend to read this one
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(8)
+                });
+
                 return Ok();
             }
             catch (Exception exception)
@@ -44,6 +59,7 @@ namespace backend.Controllers
             }
         }
 
+        [ValidateCSRFToken]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -59,6 +75,7 @@ namespace backend.Controllers
             // Delete the Cookies
             Response.Cookies.Delete("accessToken");
             Response.Cookies.Delete("refreshToken");
+            Response.Cookies.Delete("XSRF-TOKEN");
 
             return Ok();
         }
@@ -77,13 +94,42 @@ namespace backend.Controllers
             }
         }
 
+        [ValidateCSRFToken]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(string refreshToken)
         {
             try
             {
+                // Get Auth and CSRF Tokens
                 var result = await _authService.RefreshToken(refreshToken);
-                return Ok(result);
+                var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+
+                // Attached the Tokens to Cookies
+                Response.Cookies.Append("accessToken", result.Token, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddMinutes(15)
+                });
+
+                Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(7)
+                });
+
+                Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+                {
+                    HttpOnly = false, // We want frontend to read this one
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(8)
+                });
+
+                return Ok();
             }
             catch (Exception exception)
             {
