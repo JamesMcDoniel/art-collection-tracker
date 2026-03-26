@@ -1,5 +1,6 @@
 using backend.Filters;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
@@ -84,6 +85,8 @@ namespace backend.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [ValidateAntiForgeryToken]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
