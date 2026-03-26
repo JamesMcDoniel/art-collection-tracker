@@ -7,6 +7,15 @@ export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        const hasSession = localStorage.getItem('hasSession');
+
+        // If user wasn't previously in a session, don't bother
+        // trying to restore one.
+        if (!hasSession) {
+            setIsLoading(false);
+            return;
+        }
+
         // On page reload, Check if the user already has an ongoing session,
         // if so, add the session data to state, otherwise clear it.
         const restoreSession = async () => {
@@ -20,7 +29,11 @@ export const AuthProvider = ({ children }) => {
 
                 setUser(data);
             } catch {
-                // Ignore errors, this means there wasn't a previous session.
+                // Ignore errors, this means the session expired.
+
+                // In case there's stale session indication, remove it
+                localStorage.removeItem('hasSession');
+
                 // Clear the User object, if there was one.
                 setUser(null);
             } finally {
@@ -57,6 +70,11 @@ export const AuthProvider = ({ children }) => {
             throw new Error('Login failed');
         }
 
+        // Add a flag to browser's LocalStorage that a session
+        // has started.
+        localStorage.setItem('hasSession', 'true');
+
+        // Store session data (username & role)
         const data = await response.json();
         setUser(data);
     }, []);
@@ -74,6 +92,10 @@ export const AuthProvider = ({ children }) => {
             // because the tokens could already be expired / invalid.
         }
 
+        // Clear localStorage session flag
+        localStorage.removeItem('hasSession');
+
+        // Clear session data
         setUser(null);
     }, []);
 

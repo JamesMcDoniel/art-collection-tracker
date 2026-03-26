@@ -1,6 +1,13 @@
 :root {
-    --blue: #0e4c89;
-    --green: #489d46;
+    --primary-color: #0e4c89;
+    --primary-highlight: #002855;
+    --secondary-color: #489d46;
+    --secondary-highlight: #5cb65a;
+
+    --font-color: #404041;
+
+    --primary-font: 'Poppins', sans-serif;
+    --secondary-font: 'Permanent Marker', cursive;
 }
 
 *,
@@ -12,9 +19,10 @@
 }
 
 body {
+    display: flex;
     min-height: 100vh;
 
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: var(--primary-font);
     line-height: 1.5;
 }
 

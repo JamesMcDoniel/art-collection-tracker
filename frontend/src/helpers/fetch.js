@@ -65,8 +65,15 @@ export const fetchWrapper = async (url, options = {}) => {
                 }
             });
         } else {
+            // If the refresh failed, that more than likely means
+            // the refreshToken is expired, thus session is expired.
             throw new Error('Session expired');
         }
+    }
+
+    // If there's a different error not handled above, throw it
+    if (!response.ok) {
+        throw new Error(response.status);
     }
 
     return response;
