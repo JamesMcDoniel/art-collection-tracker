@@ -1,3 +1,5 @@
+using System.Net;
+using System.Security.Cryptography;
 using backend.Data;
 using backend.Models;
 using BCrypt.Net;
@@ -6,12 +8,16 @@ using Microsoft.EntityFrameworkCore;
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _context;
+    private readonly string _clientURL;
     private readonly ITokenService _tokenService;
+    private readonly IEmailService _emailService;
 
-    public AuthService(AppDbContext context, ITokenService tokenService)
+    public AuthService(AppDbContext context, ITokenService tokenService, IEmailService emailService, IConfiguration config)
     {
         _context = context;
+        _clientURL = config["AppSettings:ClientURL"]!;
         _tokenService = tokenService;
+        _emailService = emailService;
     }
 
     public async Task<AuthDto> Login(LoginDto dto)
@@ -20,7 +26,7 @@ public class AuthService : IAuthService
         var user = await _context.User
             .Include(user => user.Role)
             .Include(user => user.RefreshTokens)
-            .FirstOrDefaultAsync(user => user.Username == dto.Username);
+            .FirstOrDefaultAsync(user => user.Email == dto.Email);
 
         // If no user is found, or if provided password doesn't match stored password,
         // throw exception
@@ -42,7 +48,7 @@ public class AuthService : IAuthService
         {
             Token = token,
             RefreshToken = refreshToken.Token,
-            Username = user.Username,
+            Email = user.Email,
             Role = user.Role!.Title
         };
     }
@@ -50,7 +56,7 @@ public class AuthService : IAuthService
     public async Task Register(RegisterDto dto)
     {
         // Check to see if provided Username already exists in database
-        bool isTaken = await _context.User.AnyAsync(user => user.Username == dto.Username);
+        bool isTaken = await _context.User.AnyAsync(user => user.Email == dto.Email);
 
         if (isTaken)
         {
@@ -64,7 +70,7 @@ public class AuthService : IAuthService
         // Create new User object to store in Database
         var user = new User
         {
-            Username = dto.Username,
+            Email = dto.Email,
             PasswordHash = hashedPassword,
             RoleId = dto.Role
         };
@@ -104,7 +110,7 @@ public class AuthService : IAuthService
         {
             Token = jwt,
             RefreshToken = newRefreshToken.Token,
-            Username = refreshToken.User.Username,
+            Email = refreshToken.User.Email,
             Role = refreshToken.User.Role!.Title
         };
     }
@@ -121,5 +127,78 @@ public class AuthService : IAuthService
             refreshToken.RevokedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task RequestPasswordReset(string email)
+    {
+        var user = await _context.User.FirstOrDefaultAsync(user => user.Email == email);
+
+        if (user == null)
+        {
+            throw new Exception("Error requesting reset");
+        }
+
+        // Invalidate any existing active tokens
+        var existingTokens = await _context.PasswordReset
+            .Where(passwordReset => passwordReset.UserId == user.Id &&
+                !passwordReset.isUsed &&
+                passwordReset.ExpiresAt > DateTime.UtcNow)
+            .ToListAsync();
+
+        foreach (var t in existingTokens)
+        {
+            t.isUsed = true;
+        }
+
+        // Generate a random string to use as token
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+        // Save token to database
+        var passwordReset = new PasswordReset
+        {
+            Token = token,
+            UserId = user.Id,
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            isUsed = false
+        };
+
+        _context.PasswordReset.Add(passwordReset);
+        await _context.SaveChangesAsync();
+
+        // Send email to User
+        var resetLink = $"{_clientURL}/reset-password?token={WebUtility.UrlEncode(token)}&email={user.Email}";
+        await _emailService.SendEmail(user.Email, "Reset Password",
+            $"<p>Click <a href='{resetLink}'>here</a> to reset your password.</p><p>or, Copy and Paste:</p><p>{resetLink}</p>");
+    }
+
+    public async Task ResetPassword(string email, string token, string newPassword)
+    {
+        // Get User and their Reset Tokens
+        var user = await _context.User
+            .Include(user => user.PasswordResets)
+            .FirstOrDefaultAsync(user => user.Email == email);
+
+        if (user == null)
+        {
+            throw new Exception("Unable to find user");
+        }
+
+        // Find the current token
+        var previousToken = user.PasswordResets.FirstOrDefault(passwordReset =>
+            passwordReset.Token == token &&
+            !passwordReset.isUsed &&
+            passwordReset.ExpiresAt > DateTime.UtcNow);
+
+        if (previousToken == null)
+        {
+            throw new Exception("No tokens found");
+        }
+
+        // Update Password & void the Reset token
+        var salt = BCrypt.Net.BCrypt.GenerateSalt();
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword, salt);
+        previousToken.isUsed = true;
+
+        await _context.SaveChangesAsync();
     }
 }

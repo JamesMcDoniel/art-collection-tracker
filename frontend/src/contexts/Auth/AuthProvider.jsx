@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthContext } from './AuthContext';
 import { fetchWrapper } from '../../helpers/fetch';
+import Loading from '../../components/Loading';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -46,7 +47,7 @@ export const AuthProvider = ({ children }) => {
         restoreSession();
     }, []);
 
-    const login = useCallback(async (username, password) => {
+    const login = useCallback(async (email, password) => {
         // We're using the regular, unauthenticated fetch here because the
         // user wouldn't have tokens, at this point, until after successfully
         // logging in.
@@ -57,7 +58,7 @@ export const AuthProvider = ({ children }) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                username,
+                email,
                 password
             })
         });
@@ -124,6 +125,8 @@ export const AuthProvider = ({ children }) => {
     );
 
     return (
-        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={value}>
+            {isLoading ? <Loading /> : children}
+        </AuthContext.Provider>
     );
 };

@@ -18,12 +18,26 @@
     padding: 0;
 }
 
-body {
-    display: flex;
-    min-height: 100vh;
+::selection {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
 
+body,
+#root {
+    min-height: 100vh;
+}
+
+body {
     font-family: var(--primary-font);
+    font-weight: 300;
+    color: var(--font-color);
     line-height: 1.5;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
 }
 
 img {

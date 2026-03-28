@@ -1,0 +1,45 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    height: 100vh;
+}
+
+.spinner {
+    position: relative;
+    height: 56px;
+    width: 56px;
+    border-radius: 50%;
+    margin-bottom: 0.5em;
+
+    background: conic-gradient(
+        from 90deg at 50% 50%,
+        transparent 0deg,
+        var(--secondary-color) 360deg
+    );
+
+    animation: spin 1.5s linear infinite;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        height: 40px;
+        width: 40px;
+        background: #fff;
+        border-radius: 50%;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

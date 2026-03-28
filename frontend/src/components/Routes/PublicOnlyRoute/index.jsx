@@ -1,28 +1,21 @@
 import { Navigate, Outlet } from 'react-router';
 import { useAuthContext } from '../../../hooks/useAuthContext';
 
-const ProtectedRoutes = ({ roles }) => {
+const PublicOnlyRoute = () => {
     // const { user, isLoading } = useAuthContext();
     const { user } = useAuthContext();
 
     // if (isLoading) {
-    //     // Temporary placeholder
+    //     // Temp placeholder
     //     return <div>Loading...</div>;
     // }
 
-    if (!user) {
+    if (user) {
+        // There's no reason for an authenticated user to visit the Login page,
+        // so redirect them to their proper landing page.
         return (
             <Navigate
-                to="/login"
-                replace
-            />
-        );
-    }
-
-    if (roles && !roles.includes(user.role)) {
-        return (
-            <Navigate
-                to="/unauthorized"
+                to={user.role === 'IT' ? '/users' : '/collection'}
                 replace
             />
         );
@@ -31,4 +24,4 @@ const ProtectedRoutes = ({ roles }) => {
     return <Outlet />;
 };
 
-export default ProtectedRoutes;
+export default PublicOnlyRoute;

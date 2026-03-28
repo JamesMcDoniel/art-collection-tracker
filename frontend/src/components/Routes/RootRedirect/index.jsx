@@ -2,12 +2,13 @@ import { Navigate } from 'react-router';
 import { useAuthContext } from '../../../hooks/useAuthContext';
 
 const RootRedirect = () => {
-    const { user, isLoading } = useAuthContext();
+    // const { user, isLoading } = useAuthContext();
+    const { user } = useAuthContext();
 
-    if (isLoading) {
-        // Placeholder, For now...
-        return <div>Loading...</div>;
-    }
+    // if (isLoading) {
+    //     // Placeholder, For now...
+    //     return <div>Loading...</div>;
+    // }
 
     return (
         <Navigate

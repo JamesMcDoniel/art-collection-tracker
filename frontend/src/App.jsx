@@ -1,14 +1,17 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { AuthProvider } from './contexts/Auth/AuthProvider';
 import RootRedirect from './components/Routes/RootRedirect';
+import PublicOnlyRoute from './components/Routes/PublicOnlyRoute';
 import ProtectedRoutes from './components/Routes/ProtectedRoutes';
 import Layout from './components/Layout';
 import ArtworkDetail from './pages/ArtworkDetail';
 import Collection from './pages/Collection';
+import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Reports from './pages/Reports';
 import ReportsDetail from './pages/ReportsDetail';
+import ResetPassword from './pages/ResetPassword';
 import Unauthorized from './pages/Unauthorized';
 import Users from './pages/Users';
 
@@ -25,10 +28,25 @@ const App = () => {
                         />
 
                         {/* Unauthenticated Routes */}
+                        {/* Redirect Authenticated users off of /login */}
+                        <Route element={<PublicOnlyRoute />}>
+                            <Route
+                                path="/login"
+                                element={<Login />}
+                            />
+                        </Route>
+
+                        {/* Password Recovery Routes */}
                         <Route
-                            path="/login"
-                            element={<Login />}
+                            path="/forgot-password"
+                            element={<ForgotPassword />}
                         />
+                        <Route
+                            path="/reset-password"
+                            element={<ResetPassword />}
+                        />
+
+                        {/* Sent here if invalid Role */}
                         <Route
                             path="/unauthorized"
                             element={<Unauthorized />}

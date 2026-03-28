@@ -10,6 +10,7 @@ namespace backend.Data
         public DbSet<User> User { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; }
+        public DbSet<PasswordReset> PasswordReset { get; set; }
 
         public DbSet<Artwork> Artwork { get; set; }
         public DbSet<Collection> Collection { get; set; }
@@ -25,7 +26,7 @@ namespace backend.Data
         {
             // Unique Constraints
             modelBuilder.Entity<User>()
-                .HasIndex(user => user.Username)
+                .HasIndex(user => user.Email)
                 .IsUnique();
 
             modelBuilder.Entity<Role>()
@@ -85,6 +86,13 @@ namespace backend.Data
                 .HasForeignKey(refreshToken => refreshToken.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Remove all of a User's password resets if the User is deleted
+            modelBuilder.Entity<PasswordReset>()
+                .HasOne(passwordReset => passwordReset.User)
+                .WithMany(user => user.PasswordResets)
+                .HasForeignKey(passwordReset => passwordReset.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // When a lookup table record is deleted, set the associated field
             // in Artwork to null.
             modelBuilder.Entity<Artwork>()
@@ -136,6 +144,17 @@ namespace backend.Data
                 new Role { Id = 2, Title = "Facilities" },
                 new Role { Id = 3, Title = "IT" },
                 new Role { Id = 4, Title = "Guest" }
+            );
+
+            // Seed User Table with a Default IT Role Admin Account
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 1,
+                    Email = "default_admin",
+                    PasswordHash = "$2a$11$iQFB86E7X6Mrz6FlOh5Z5.FjIe7nCeS6edrMtLqSE4TEreCmyxDRC",
+                    RoleId = 3
+                }
             );
         }
     }

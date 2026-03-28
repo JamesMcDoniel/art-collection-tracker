@@ -1,4 +1,5 @@
 using backend.Filters;
+using backend.Models;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,7 +55,7 @@ namespace backend.Controllers
 
                 return Ok(new SessionDto
                 {
-                    Username = result.Username,
+                    Email = result.Email,
                     Role = result.Role
                 });
             }
@@ -64,7 +65,6 @@ namespace backend.Controllers
             }
         }
 
-        [ValidateCSRFToken]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -85,8 +85,8 @@ namespace backend.Controllers
             return Ok();
         }
 
-        [Authorize]
-        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "IT")]
+        [ValidateCSRFToken]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
@@ -101,12 +101,18 @@ namespace backend.Controllers
             }
         }
 
-        [ValidateCSRFToken]
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh(string refreshToken)
+        public async Task<IActionResult> Refresh()
         {
             try
             {
+                var refreshToken = Request.Cookies["refreshToken"];
+
+                if (string.IsNullOrEmpty(refreshToken))
+                {
+                    return Unauthorized();
+                }
+
                 // Get Auth and CSRF Tokens
                 var result = await _authService.RefreshToken(refreshToken);
                 var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
@@ -138,13 +144,41 @@ namespace backend.Controllers
 
                 return Ok(new SessionDto
                 {
-                    Username = result.Username,
+                    Email = result.Email,
                     Role = result.Role
                 });
             }
             catch (Exception exception)
             {
                 return Unauthorized(exception.Message);
+            }
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            try
+            {
+                await _authService.RequestPasswordReset(dto.Email);
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return Unauthorized(exception.Message);
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+        {
+            try
+            {
+                await _authService.ResetPassword(dto.Email, dto.Token, dto.NewPassword);
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
             }
         }
     }

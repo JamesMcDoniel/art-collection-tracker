@@ -60,9 +60,13 @@ builder.Services.AddAuthorization();
 // Create Database connection
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=database.db"));
 
+// Register EmailService Configuration
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
 // Register Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Configure Controllers
 builder.Services.AddControllers();
