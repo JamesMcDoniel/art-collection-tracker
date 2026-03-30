@@ -67,6 +67,9 @@ builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailS
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IArtworkService, ArtworkService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ISpreadsheetService, SpreadsheetService>();
 
 // Configure Controllers
 builder.Services.AddControllers();

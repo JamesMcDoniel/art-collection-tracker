@@ -51,6 +51,7 @@ const ResetPassword = () => {
                         type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter a new password..."
                         required
                     />
                 </div>
@@ -61,6 +62,7 @@ const ResetPassword = () => {
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm password..."
                         required
                     />
                 </div>

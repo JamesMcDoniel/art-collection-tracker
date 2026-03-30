@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using backend.Data;
-using backend.Models;
+using backend.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
@@ -9,26 +8,139 @@ namespace backend.Controllers
     [Route("api/artwork")]
     public class ArtworkController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IArtworkService _artworkService;
+        private readonly ISpreadsheetService _spreadsheetService;
 
-        public ArtworkController(AppDbContext context)
+        public ArtworkController(IArtworkService artworkService, ISpreadsheetService spreadsheetService)
         {
-            _context = context;
+            _artworkService = artworkService;
+            _spreadsheetService = spreadsheetService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateNewArtwork([FromBody] Artwork request)
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetAllArtwork()
         {
-            Artwork artwork = new Artwork
+            try
             {
-                // Only title is required, so that's all this will do for now.
-                Title = request.Title
-            };
+                var artworks = await _artworkService.GetAllArtwork();
+                return Ok(artworks);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
 
-            _context.Artwork.Add(artwork);
-            await _context.SaveChangesAsync();
+        [Authorize]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetArtworkById(int id)
+        {
+            try
+            {
+                var artwork = await _artworkService.GetArtworkById(id);
+                return Ok(artwork);
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
 
-            return Ok(new { message = "Success" });
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpPost]
+        public async Task<IActionResult> CreateArtwork([FromForm] ArtworkDto dto)
+        {
+            try
+            {
+                var artwork_id = await _artworkService.CreateArtwork(dto);
+                return CreatedAtAction(nameof(GetArtworkById), new { id = artwork_id }, artwork_id);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadArtwork([FromForm] IFormFile file)
+        {
+            try
+            {
+                await _spreadsheetService.UploadSpreadsheet(file);
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateArtwork(int id, ArtworkDto dto)
+        {
+            try
+            {
+                var response = await _artworkService.UpdateArtwork(id, dto);
+                return Ok(response);
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Facilities")]
+        [ValidateCSRFToken]
+        [HttpPatch("{id}/location")]
+        public async Task<IActionResult> UpdateLocation(int id, UpdateLocationDto dto)
+        {
+            try
+            {
+                await _artworkService.UpdateLocation(id, dto.Location);
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteArtwork(int id)
+        {
+            try
+            {
+                await _artworkService.DeleteArtwork(id);
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpGet("filters")]
+        public async Task<IActionResult> GetAllFilters()
+        {
+            try
+            {
+                var response = await _artworkService.GetAllFilters();
+                return Ok(response);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
         }
     }
 }

@@ -2,20 +2,14 @@ import { Navigate, Outlet } from 'react-router';
 import { useAuthContext } from '../../../hooks/useAuthContext';
 
 const PublicOnlyRoute = () => {
-    // const { user, isLoading } = useAuthContext();
     const { user } = useAuthContext();
 
-    // if (isLoading) {
-    //     // Temp placeholder
-    //     return <div>Loading...</div>;
-    // }
-
+    // There's no reason for an authenticated user to visit the Login page,
+    // so redirect them to their proper landing page.
     if (user) {
-        // There's no reason for an authenticated user to visit the Login page,
-        // so redirect them to their proper landing page.
         return (
             <Navigate
-                to={user.role === 'IT' ? '/users' : '/collection'}
+                to={user.role === 'IT' ? '/users' : '/artwork'}
                 replace
             />
         );

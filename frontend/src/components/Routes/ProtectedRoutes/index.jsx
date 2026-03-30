@@ -2,13 +2,7 @@ import { Navigate, Outlet } from 'react-router';
 import { useAuthContext } from '../../../hooks/useAuthContext';
 
 const ProtectedRoutes = ({ roles }) => {
-    // const { user, isLoading } = useAuthContext();
     const { user } = useAuthContext();
-
-    // if (isLoading) {
-    //     // Temporary placeholder
-    //     return <div>Loading...</div>;
-    // }
 
     if (!user) {
         return (

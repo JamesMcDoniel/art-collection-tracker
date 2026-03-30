@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { NavLink } from 'react-router';
 import { useAuthContext } from '../../../../hooks/useAuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -37,16 +37,16 @@ const Header = ({ isDrawerOpen, toggleDrawer }) => {
                     <nav>
                         <ul>
                             <li>
-                                <Link to="/collection">Collection</Link>
+                                <NavLink to="/artwork">Artwork</NavLink>
                             </li>
                             {user.role === 'Curator' ? (
                                 <li>
-                                    <Link to="/reports">Reports</Link>
+                                    <NavLink to="/reports">Reports</NavLink>
                                 </li>
                             ) : null}
                             {user.role === 'IT' ? (
                                 <li>
-                                    <Link to="/users">Users</Link>
+                                    <NavLink to="/users">Users</NavLink>
                                 </li>
                             ) : null}
                             <li>

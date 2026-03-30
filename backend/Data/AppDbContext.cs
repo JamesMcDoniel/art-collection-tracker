@@ -5,7 +5,12 @@ namespace backend.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        private readonly IWebHostEnvironment? _env;
+        public AppDbContext(DbContextOptions<AppDbContext> options, IWebHostEnvironment env)
+            : base(options)
+        {
+            _env = env;
+        }
 
         public DbSet<User> User { get; set; }
         public DbSet<Role> Role { get; set; }
@@ -114,6 +119,12 @@ namespace backend.Data
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Artwork>()
+                .HasOne(artwork => artwork.Medium)
+                .WithMany(medium => medium.Artworks)
+                .HasForeignKey(artwork => artwork.Medium_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Artwork>()
                 .HasOne(artwork => artwork.Location)
                 .WithMany(location => location.Artworks)
                 .HasForeignKey(artwork => artwork.Location_Id)
@@ -156,6 +167,38 @@ namespace backend.Data
                     RoleId = 3
                 }
             );
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
+        {
+            // Collect the Image.Path of Image records being deleted
+            var filesToDelete = ChangeTracker.Entries<Image>()
+                .Where(e => e.State == EntityState.Deleted)
+                .Select(e => e.Entity.Path)
+                .ToList();
+
+            // Let the original Save go through
+            var result = await base.SaveChangesAsync(ct);
+
+            if (_env?.WebRootPath != null)
+            {
+                foreach (var relativePath in filesToDelete)
+                {
+                    if (string.IsNullOrWhiteSpace(relativePath))
+                    {
+                        continue;
+                    }
+
+                    var fullPath = Path.Combine(_env.WebRootPath, relativePath);
+
+                    if (File.Exists(fullPath))
+                    {
+                        File.Delete(fullPath);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }
