@@ -8,7 +8,7 @@ public class SpreadsheetService : ISpreadsheetService
     private readonly IArtworkService _artworkService;
 
     private readonly Dictionary<string, Collection?> _collectionCache = new Dictionary<string, Collection?>();
-    private readonly Dictionary<string, backend.Models.Category?> _categoryCache = new Dictionary<string, backend.Models.Category?>();
+    private readonly Dictionary<string, Category?> _categoryCache = new Dictionary<string, Category?>();
     private readonly Dictionary<string, Artist?> _artistCache = new Dictionary<string, Artist?>();
     private readonly Dictionary<string, Medium?> _mediumCache = new Dictionary<string, Medium?>();
     private readonly Dictionary<string, Location?> _locationCache = new Dictionary<string, Location?>();
@@ -125,7 +125,7 @@ public class SpreadsheetService : ISpreadsheetService
                 Medium = await CacheMedium(ValidateString(row, columnMap, "medium")),
                 Location = await CacheLocation(ValidateString(row, columnMap, "location")),
                 Loan_Status = await CacheLoanStatus(ValidateString(row, columnMap, "loanstatus")),
-                Donor = await CacheDonor(ValidateString(row, columnMap, "donorname")),
+                Donor = await CacheDonor(ValidateString(row, columnMap, "donorname"))
             };
 
             _context.Artwork.Add(artwork);
@@ -167,7 +167,7 @@ public class SpreadsheetService : ISpreadsheetService
         }
     }
 
-    private string? ValidateString(IXLRow row, Dictionary<string, int> columnMap, string columnName)
+    public string? ValidateString(IXLRow row, Dictionary<string, int> columnMap, string columnName)
     {
         if (!columnMap.ContainsKey(columnName))
         {
@@ -179,7 +179,7 @@ public class SpreadsheetService : ISpreadsheetService
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
-    private string ValidateRequiredString(IXLRow row, Dictionary<string, int> columnMap, string columnName)
+    public string ValidateRequiredString(IXLRow row, Dictionary<string, int> columnMap, string columnName)
     {
         var value = ValidateString(row, columnMap, columnName);
 
@@ -191,7 +191,7 @@ public class SpreadsheetService : ISpreadsheetService
         return value;
     }
 
-    private double? ValidateDouble(IXLRow row, Dictionary<string, int> columnMap, string columnName)
+    public double? ValidateDouble(IXLRow row, Dictionary<string, int> columnMap, string columnName)
     {
         if (!columnMap.ContainsKey(columnName))
         {
@@ -239,7 +239,7 @@ public class SpreadsheetService : ISpreadsheetService
         return collection;
     }
 
-    private async Task<backend.Models.Category?> CacheCategory(string? title)
+    private async Task<Category?> CacheCategory(string? title)
     {
         if (string.IsNullOrWhiteSpace(title))
         {

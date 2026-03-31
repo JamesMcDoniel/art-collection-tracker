@@ -128,7 +128,6 @@ namespace backend.Controllers
         }
 
         [Authorize(Roles = "Curator")]
-        [ValidateCSRFToken]
         [HttpGet("filters")]
         public async Task<IActionResult> GetAllFilters()
         {

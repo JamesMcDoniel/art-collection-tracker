@@ -7,5 +7,6 @@ namespace backend.Models
 
         // Relationship
         public ICollection<Artwork> Artworks { get; set; } = new List<Artwork>();
+        public ICollection<Report> Reports { get; set; } = new List<Report>();
     }
 }

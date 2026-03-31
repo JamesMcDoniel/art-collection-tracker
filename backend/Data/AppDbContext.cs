@@ -16,6 +16,7 @@ namespace backend.Data
         public DbSet<Role> Role { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; }
         public DbSet<PasswordReset> PasswordReset { get; set; }
+        public DbSet<Report> Report { get; set; }
 
         public DbSet<Artwork> Artwork { get; set; }
         public DbSet<Collection> Collection { get; set; }
@@ -99,11 +100,17 @@ namespace backend.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // When a lookup table record is deleted, set the associated field
-            // in Artwork to null.
+            // in Artwork and Reports to null.
             modelBuilder.Entity<Artwork>()
                 .HasOne(artwork => artwork.Collection)
                 .WithMany(collection => collection.Artworks)
                 .HasForeignKey(artwork => artwork.Collection_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Report>()
+                .HasOne(report => report.Collection)
+                .WithMany(collection => collection.Reports)
+                .HasForeignKey(report => report.Collection_Id)
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Artwork>()
@@ -112,10 +119,22 @@ namespace backend.Data
                 .HasForeignKey(artwork => artwork.Category_Id)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<Report>()
+                .HasOne(report => report.Category)
+                .WithMany(category => category.Reports)
+                .HasForeignKey(report => report.Category_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Artwork>()
                 .HasOne(artwork => artwork.Artist)
                 .WithMany(artist => artist.Artworks)
                 .HasForeignKey(artwork => artwork.Artist_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Report>()
+                .HasOne(report => report.Artist)
+                .WithMany(artist => artist.Reports)
+                .HasForeignKey(report => report.Artist_Id)
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Artwork>()
@@ -124,10 +143,22 @@ namespace backend.Data
                 .HasForeignKey(artwork => artwork.Medium_Id)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<Report>()
+                .HasOne(report => report.Medium)
+                .WithMany(medium => medium.Reports)
+                .HasForeignKey(report => report.Medium_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Artwork>()
                 .HasOne(artwork => artwork.Location)
                 .WithMany(location => location.Artworks)
                 .HasForeignKey(artwork => artwork.Location_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Report>()
+                .HasOne(report => report.Location)
+                .WithMany(location => location.Reports)
+                .HasForeignKey(report => report.Location_Id)
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Artwork>()
@@ -136,10 +167,22 @@ namespace backend.Data
                 .HasForeignKey(artwork => artwork.Loan_Status_Id)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<Report>()
+                .HasOne(report => report.Loan_Status)
+                .WithMany(loan_status => loan_status.Reports)
+                .HasForeignKey(report => report.Loan_Status_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Artwork>()
                 .HasOne(artwork => artwork.Donor)
                 .WithMany(donor => donor.Artworks)
                 .HasForeignKey(artwork => artwork.Donor_Id)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Report>()
+                .HasOne(report => report.Donor)
+                .WithMany(donor => donor.Reports)
+                .HasForeignKey(report => report.Donor_Id)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // When an Artwork is deleted, cascade delete related Image(s)
@@ -171,10 +214,19 @@ namespace backend.Data
 
         public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {
-            // Collect the Image.Path of Image records being deleted
-            var filesToDelete = ChangeTracker.Entries<Image>()
+            // Get the paths of any Image entities being deleted
+            var imagesToDelete = ChangeTracker.Entries<Image>()
                 .Where(e => e.State == EntityState.Deleted)
                 .Select(e => e.Entity.Path)
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .Select(path => path!)
+                .ToList();
+
+            // Get the paths of any Report entities being deleted
+            var reportsToDelete = ChangeTracker.Entries<Report>()
+                .Where(e => e.State == EntityState.Deleted)
+                .Select(e => e.Entity.Path)
+                .Where(path => !string.IsNullOrWhiteSpace(path))
                 .ToList();
 
             // Let the original Save go through
@@ -182,23 +234,36 @@ namespace backend.Data
 
             if (_env?.WebRootPath != null)
             {
-                foreach (var relativePath in filesToDelete)
+                var imagesFolder = Path.Combine(_env.WebRootPath, "uploads");
+                DeleteFiles(imagesFolder, imagesToDelete);
+            }
+
+            var reportsFolder = Path.Combine(Directory.GetCurrentDirectory(), "reports");
+            DeleteFiles(reportsFolder, reportsToDelete);
+
+            return result;
+        }
+
+        private void DeleteFiles(string folder, List<string> paths)
+        {
+            foreach (var path in paths)
+            {
+                try
                 {
-                    if (string.IsNullOrWhiteSpace(relativePath))
-                    {
-                        continue;
-                    }
-
-                    var fullPath = Path.Combine(_env.WebRootPath, relativePath);
-
+                    var fullPath = Path.Combine(folder, Path.GetFileName(path));
                     if (File.Exists(fullPath))
                     {
                         File.Delete(fullPath);
                     }
                 }
+                catch (Exception exception)
+                {
+                    // I don't quite want the whole app to crash should this
+                    // get hung up on a file, so I'll catch and just log it to
+                    // console
+                    Console.WriteLine(exception.Message);
+                }
             }
-
-            return result;
         }
     }
 }

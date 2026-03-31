@@ -1,22 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.ML;
-using Microsoft.ML.Data;
-using Microsoft.ML.Transforms.Image;
-using System.Drawing;
 using backend.Data;
-using backend.Models;
 using backend.Filters;
 using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Contollers
 {
-    public class UploadDTO
-    {
-        public IFormFile? File { get; set; }
-        public int Artwork_Id { get; set; }
-    }
-
     [ApiController]
     [Route("api/image")]
     public class ImageController : ControllerBase

@@ -70,6 +70,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IArtworkService, ArtworkService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ISpreadsheetService, SpreadsheetService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // Configure Controllers
 builder.Services.AddControllers();
