@@ -1,0 +1,103 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    width: 300px;
+}
+
+.button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 14px;
+    background-color: #fff;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--font-color);
+
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: var(--secondary-highlight);
+    }
+}
+
+.button.active {
+    border-color: var(--secondary-highlight);
+    background-color: var(--secondary-alpha);
+}
+
+.button[data-active],
+.button:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.options {
+    background-color: white;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    padding: 4px;
+    margin-top: 4px;
+
+    width: var(--button-width);
+    z-index: 999;
+
+    transition:
+        opacity 100ms ease-out,
+        transform 100ms ease-out;
+}
+
+.options[data-transition] {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    cursor: default;
+    user-select: none;
+
+    font-size: 0.9rem;
+    color: var(--font-color);
+}
+
+.option[data-focus] {
+    background-color: var(--secondary-alpha);
+    color: var(--font-color);
+    outline: none;
+}
+
+.option .check {
+    visibility: hidden;
+    color: var(--font-color);
+    font-size: 0.8rem;
+}
+
+.option[data-selected] .check {
+    visibility: visible;
+}
+
+.option_text {
+    flex: 1;
+}

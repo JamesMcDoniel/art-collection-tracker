@@ -45,6 +45,9 @@ backend/Models/resnet50-v1-7.onnx
 # Uploaded Images
 backend/wwwroot/uploads/*
 
+# Reports
+backend/reports/*
+
 # User-specific files
 backend/*.rsuser
 backend/*.suo

@@ -64,11 +64,16 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('Invalid Credentials');
+            let errorMessage = 'Something went wrong';
+
+            try {
+                const errorResponse = await response.text();
+                errorMessage = errorResponse || errorMessage;
+            } catch (error) {
+                console.log(error);
             }
 
-            throw new Error('Login failed');
+            throw new Error(errorMessage);
         }
 
         // Add a flag to browser's LocalStorage that a session

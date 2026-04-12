@@ -1,0 +1,119 @@
+.container {
+    display: flex;
+    height: calc(100vh - 90px);
+}
+
+.create_reports {
+    height: calc(100vh - 90px);
+    width: 500px;
+
+    overflow-y: auto;
+
+    scrollbar-color: auto transparent;
+    scrollbar-gutter: stable;
+
+    @media (max-width: 768px) {
+        position: fixed;
+        top: 90px;
+        left: 0;
+        z-index: 900;
+
+        height: calc(100vh - 90px);
+        width: 100%;
+
+        background-color: rgb(250, 250, 250);
+
+        transform: translateX(-100%);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+.create_reports.open {
+    @media (max-width: 768px) {
+        transform: translateX(0);
+    }
+}
+
+.generate_report,
+.upload_report {
+    padding: 1em;
+
+    & > h2 {
+        font-family: var(--secondary-font);
+        font-size: 1.75rem;
+        letter-spacing: 1.5px;
+        text-align: center;
+
+        margin-bottom: 0.5em;
+    }
+
+    & > form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5em;
+
+        & > div:has(> span[role='checkbox']) {
+            margin-top: 1em;
+        }
+
+        & > button {
+            width: 300px;
+            margin-top: 1em;
+
+            font: inherit;
+            font-size: 0.95rem;
+
+            padding: 10px 14px;
+
+            background-color: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            transition: border-color 0.2s ease;
+
+            &:hover {
+                border-color: var(--secondary-highlight);
+            }
+        }
+    }
+}
+
+.upload_report {
+    padding-bottom: 3em;
+
+    & > h2 {
+        margin-bottom: 1em;
+    }
+}
+
+.stored_reports {
+    border-left: 2px solid rgb(160, 160, 160);
+
+    @media (max-width: 768px) {
+        border: 0;
+    }
+}
+
+.search_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 90px;
+    border-bottom: 1px solid rgb(160, 160, 160);
+}
+
+.table_container {
+    position: relative;
+    height: calc(100vh - 90px - 90px);
+    width: calc(100vw - 500px);
+
+    overflow: scroll;
+
+    @media (max-width: 768px) {
+        width: 100vw;
+    }
+}

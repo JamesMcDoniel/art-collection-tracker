@@ -1,208 +1,227 @@
-import { useState } from 'react';
+import { useCallback, useReducer } from 'react';
 import { useArtworkContext } from '../../hooks/useArtworkContext';
+import { useAuthContext } from '../../hooks/useAuthContext';
+import { useCarousel } from '../../hooks/useCarousel';
+import { faDollarSign } from '@fortawesome/free-solid-svg-icons';
+import Loading from '../../components/Loading';
+import Carousel from '../../components/Carousel';
+import ComboBox from '../../components/Combobox';
+import TextInput from '../../components/TextInput';
+import TextArea from '../../components/TextArea';
+import styles from './NewArtwork.module.css';
+
+const artworkReducer = (state, action) => {
+    switch (action.type) {
+        case 'UPDATE_FIELD':
+            return {
+                ...state,
+                [action.field]: action.value === '' ? null : action.value
+            };
+
+        default:
+            return state;
+    }
+};
 
 const NewArtwork = () => {
-    const [formData, setFormData] = useState({
-        asset_num: '',
-        title: '',
-        description: '',
-        dimensions: '',
-        retail_low_estimate: '',
-        retail_high_estimate: '',
-        collection: '',
-        category: '',
-        artist: '',
-        medium: '',
-        location: '',
-        loan_status: '',
-        donor: '',
-        images: []
+    const [state, dispatch] = useReducer(artworkReducer, {
+        asset_Num: null,
+        title: null,
+        description: null,
+        dimensions: null,
+        collection: null,
+        category: null,
+        artist: null,
+        medium: null,
+        location: null,
+        loan_Status: null,
+        donor: null,
+        retail_Low_Estimate: null,
+        retail_High_Estimate: null
     });
-    const { createArtwork } = useArtworkContext();
+    const { filters, isLoading, createArtwork } = useArtworkContext();
+    const {
+        images,
+        uploadedFiles,
+        handleUpload,
+        handleDelete,
+        hasChanges: hasImagesChanged
+    } = useCarousel();
+    const { user } = useAuthContext();
 
-    const handleChange = (e) => {
-        const { name, value, type } = e.target;
+    const handleChange = useCallback((value, field) => {
+        const isNumeric =
+            field === 'retail_Low_Estimate' || field === 'retail_High_Estimate';
 
-        // If input.type is number, parseFloat. Otherwise, pass the value
-        setFormData((prev) => ({
-            ...prev,
-            [name]:
-                type === 'number' && value !== '' ? parseFloat(value) : value
-        }));
-    };
+        const processValue =
+            isNumeric && value !== ''
+                ? Number(value)
+                : value === ''
+                  ? null
+                  : value;
 
-    const handleFileChange = (e) => {
-        // Convert the FileList to Array, and store that
-        const files = Array.from(e.target.files);
-
-        setFormData((prev) => ({
-            ...prev,
-            images: files
-        }));
-    };
+        dispatch({ type: 'UPDATE_FIELD', field, value: processValue });
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Convert empty strings in the state object to null
-        const data = Object.fromEntries(
-            Object.entries(formData).map(([key, value]) => [
-                key,
-                typeof value === 'string' && value.trim() === '' ? null : value
-            ])
-        );
-
-        await createArtwork(data);
+        await createArtwork(state, uploadedFiles);
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label htmlFor="images">Images</label>
-                <input
-                    id="images"
-                    name="images"
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleFileChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="asset_num">Asset Number</label>
-                <input
-                    id="asset_num"
-                    name="asset_num"
-                    type="text"
-                    value={formData.asset_num}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="title">Title</label>
-                <input
-                    id="title"
-                    name="title"
-                    type="text"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-            <div>
-                <label htmlFor="description">Description</label>
-                <input
-                    id="description"
-                    name="description"
-                    type="text"
-                    value={formData.description}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="dimensions">Dimensions</label>
-                <input
-                    id="dimensions"
-                    name="dimensions"
-                    type="text"
-                    value={formData.dimensions}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="retail_low_estimate">Retail Low Estimate</label>
-                <input
-                    id="retail_low_estimate"
-                    name="retail_low_estimate"
-                    type="number"
-                    value={formData.retail_low_estimate}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="retail_high_estimate">
-                    Retail High Estimate
-                </label>
-                <input
-                    id="retail_high_estimate"
-                    name="retail_high_estimate"
-                    type="number"
-                    value={formData.retail_high_estimate}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="collection">Collection</label>
-                <input
-                    id="collection"
-                    name="collection"
-                    type="text"
-                    value={formData.collection}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="category">Category</label>
-                <input
-                    id="category"
-                    name="category"
-                    type="text"
-                    value={formData.category}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="artist">Artist</label>
-                <input
-                    id="artist"
-                    name="artist"
-                    type="text"
-                    value={formData.artist}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="medium">Medium</label>
-                <input
-                    id="medium"
-                    name="medium"
-                    type="text"
-                    value={formData.medium}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="location">Location</label>
-                <input
-                    id="location"
-                    name="location"
-                    type="text"
-                    value={formData.location}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="loan_status">Loan Status</label>
-                <input
-                    id="loan_status"
-                    name="loan_status"
-                    type="text"
-                    value={formData.loan_status}
-                    onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label htmlFor="donor">Donor</label>
-                <input
-                    id="donor"
-                    name="donor"
-                    type="text"
-                    value={formData.donor}
-                    onChange={handleChange}
-                />
-            </div>
-            <button type="submit">Submit</button>
-        </form>
+        <section className={styles.container}>
+            {!isLoading.filter && !isLoading.artwork ? (
+                <>
+                    <div className={styles.button_row}>
+                        <div>
+                            <button
+                                className={styles.update}
+                                type="submit"
+                                form="artwork-form"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                    <form
+                        id="artwork-form"
+                        onSubmit={handleSubmit}
+                    >
+                        <div className={styles.flex_container}>
+                            <div className={styles.flex_child}>
+                                <Carousel
+                                    authRole={user.role}
+                                    title={state?.title ?? ''}
+                                    images={images}
+                                    onUpload={handleUpload}
+                                    onDelete={handleDelete}
+                                    hasChanged={hasImagesChanged}
+                                />
+                                <TextInput
+                                    label="Asset #"
+                                    field="asset_Num"
+                                    type="text"
+                                    value={state.asset_Num ?? ''}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <TextInput
+                                    label="Title"
+                                    field="title"
+                                    type="text"
+                                    value={state.title ?? ''}
+                                    onChange={handleChange}
+                                    trackNew
+                                    required
+                                />
+                                <TextInput
+                                    label="Dimensions"
+                                    field="dimensions"
+                                    type="text"
+                                    value={state.dimensions ?? ''}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <TextArea
+                                    label="Description"
+                                    field="description"
+                                    value={state.description ?? ''}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                            </div>
+                            <div className={styles.flex_child}>
+                                <ComboBox
+                                    label="Collection"
+                                    field="collection"
+                                    list={filters.collections}
+                                    value={state.collection}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <ComboBox
+                                    label="Category"
+                                    field="category"
+                                    list={filters.categories}
+                                    value={state.category}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <ComboBox
+                                    label="Artist"
+                                    field="artist"
+                                    list={filters.artists}
+                                    value={state.artist}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <ComboBox
+                                    label="Medium"
+                                    field="medium"
+                                    list={filters.mediums}
+                                    value={state.medium}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <ComboBox
+                                    label="Location"
+                                    field="location"
+                                    list={filters.locations}
+                                    value={state.location}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <ComboBox
+                                    label="Loan Status"
+                                    field="loan_Status"
+                                    list={filters.loan_Statuses}
+                                    value={state.loan_Status}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                <ComboBox
+                                    label="Donor"
+                                    field="donor"
+                                    list={filters.donors}
+                                    value={state.donor}
+                                    onChange={handleChange}
+                                    trackNew
+                                />
+                                {user.role === 'Curator' ? (
+                                    <>
+                                        <TextInput
+                                            label="Retail Low Estimate"
+                                            field="retail_Low_Estimate"
+                                            type="number"
+                                            icon={faDollarSign}
+                                            value={
+                                                state.retail_Low_Estimate ?? ''
+                                            }
+                                            onChange={handleChange}
+                                            trackNew
+                                        />
+                                        <TextInput
+                                            label="Retail High Estimate"
+                                            field="retail_High_Estimate"
+                                            type="number"
+                                            icon={faDollarSign}
+                                            value={
+                                                state.retail_High_Estimate ?? ''
+                                            }
+                                            onChange={handleChange}
+                                            trackNew
+                                        />
+                                    </>
+                                ) : null}
+                            </div>
+                        </div>
+                    </form>
+                </>
+            ) : (
+                <Loading />
+            )}
+        </section>
     );
 };
 

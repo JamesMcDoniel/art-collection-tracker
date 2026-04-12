@@ -77,6 +77,13 @@ builder.Services.AddControllers();
 
 WebApplication app = builder.Build();
 
+// Seed default_admin account in Database.
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DatabaseSeed.Seed(context);
+}
+
 // Enable CORS policy
 app.UseCors("dev");
 

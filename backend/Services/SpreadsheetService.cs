@@ -212,7 +212,7 @@ public class SpreadsheetService : ISpreadsheetService
     {
         var value = ValidateRequiredString(row, columnMap, columnName);
 
-        return Path.GetFileName(value).Trim().Replace(" ", "_").ToLower();
+        return Path.GetFileNameWithoutExtension(value).Trim().Replace(" ", "_").ToLower();
     }
 
     private async Task<Collection?> CacheCollection(string? title)

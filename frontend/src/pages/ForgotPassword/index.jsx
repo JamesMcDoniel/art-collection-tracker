@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
+import TextInput from '../../components/TextInput';
+import styles from './ForgotPassword.module.css';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -21,23 +24,32 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div>
-            <h1>Forgot Password</h1>
+        <section className={styles.card}>
+            <h1 className={styles.heading}>Forgot Password</h1>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                        id="email"
-                        type="text"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <p>{message ? message : ''}</p>
-                <button type="submit">Send Reset Link</button>
+                <TextInput
+                    label="Enter your email"
+                    type="email"
+                    value={email}
+                    onChange={setEmail}
+                    required
+                />
+                {message ? <p className={styles.message}>{message}</p> : null}
+                <button
+                    type="submit"
+                    className={styles.submit}
+                >
+                    Send Reset Link
+                </button>
             </form>
-        </div>
+            <Link
+                className={styles.link}
+                to={'/login'}
+                replace
+            >
+                Return to Login
+            </Link>
+        </section>
     );
 };
 

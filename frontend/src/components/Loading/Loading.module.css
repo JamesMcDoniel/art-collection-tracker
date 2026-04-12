@@ -1,10 +1,16 @@
 .container {
+    position: absolute;
+    inset: 0;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    height: 100vh;
+    & > h2 {
+        font-family: var(--secondary-font);
+        letter-spacing: 1.5px;
+    }
 }
 
 .spinner {
@@ -12,34 +18,25 @@
     height: 56px;
     width: 56px;
     border-radius: 50%;
-    margin-bottom: 0.5em;
 
     background: conic-gradient(
-        from 90deg at 50% 50%,
-        transparent 0deg,
-        var(--secondary-color) 360deg
+        from 0deg,
+        transparent 0%,
+        var(--secondary-color) 100%
+    );
+
+    mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 0);
+    -webkit-mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - 8px),
+        #000 0
     );
 
     animation: spin 1.5s linear infinite;
-
-    &::before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        height: 40px;
-        width: 40px;
-        background: #fff;
-        border-radius: 50%;
-    }
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
+    to {
         transform: rotate(360deg);
     }
 }

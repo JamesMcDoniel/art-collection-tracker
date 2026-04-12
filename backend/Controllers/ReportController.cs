@@ -34,16 +34,21 @@ namespace backend.Controllers
         [Authorize(Roles = "Curator")]
         [ValidateCSRFToken]
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadReport(IFormFile report)
+        public async Task<IActionResult> UploadReports([FromForm] List<IFormFile> reports)
         {
+            if (reports == null || reports.Count == 0)
+            {
+                return BadRequest("No files were provided");
+            }
+
             try
             {
-                await _reportService.UploadReport(report);
+                await _reportService.UploadReports(reports);
                 return Ok();
             }
             catch (Exception exception)
             {
-                return Conflict(exception.Message);
+                return BadRequest(exception.Message);
             }
         }
 
@@ -74,9 +79,9 @@ namespace backend.Controllers
             {
                 return NotFound(exception.Message);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                return BadRequest(exception.Message);
+                return NoContent();
             }
 
         }
@@ -89,6 +94,22 @@ namespace backend.Controllers
             {
                 var response = await _reportService.ProcessReportDownload(id);
                 return File(response.Content, response.ContentType, response.FileName);
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReport(int id)
+        {
+            try
+            {
+                await _reportService.DeleteReport(id);
+                return NoContent();
             }
             catch (Exception exception)
             {

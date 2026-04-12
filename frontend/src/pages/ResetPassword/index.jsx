@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useSearchParams, Link } from 'react-router';
+import TextInput from '../../components/TextInput';
+import styles from './ResetPassword.module.css';
 
 const ResetPassword = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -40,36 +42,42 @@ const ResetPassword = () => {
     };
 
     return (
-        <>
+        <section className={styles.card}>
             <h1>Set New Password</h1>
-            <p>Resetting for: {email}</p>
+            <p>Resetting for:</p>
+            <p>{email}</p>
             <form onSubmit={handleReset}>
-                <div>
-                    <label htmlFor="new-password">New Password</label>
-                    <input
-                        id="new-password"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Enter a new password..."
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="confirm-password">Confirm Password</label>
-                    <input
-                        id="confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Confirm password..."
-                        required
-                    />
-                </div>
-                <p>{error ? error : ''}</p>
-                <button type="submit">Reset Password</button>
+                <TextInput
+                    label="New Password"
+                    type="password"
+                    value={newPassword}
+                    onChange={setNewPassword}
+                    required
+                />
+                <TextInput
+                    label="Confirm Password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                    required
+                />
+                {error ? <p className={styles.message}>{error}</p> : null}
+                <button
+                    type="submit"
+                    className={styles.submit}
+                >
+                    Reset Password
+                </button>
             </form>
-        </>
+
+            <Link
+                className={styles.link}
+                to={'/login'}
+                replace
+            >
+                Return to Login
+            </Link>
+        </section>
     );
 };
 

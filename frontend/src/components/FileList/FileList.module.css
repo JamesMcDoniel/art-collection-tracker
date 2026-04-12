@@ -1,0 +1,127 @@
+.container {
+    margin-top: 1em;
+    width: 300px;
+}
+
+.button {
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 14px;
+
+    background-color: #fff;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    font: inherit;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: var(--secondary-highlight);
+    }
+}
+
+.button[data-active],
+.button:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.button_text {
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--font-color);
+}
+
+.arrow {
+    color: var(--font-color);
+    transition: transform 0.2s ease;
+}
+
+.button[data-open] > .arrow {
+    transform: rotate(180deg);
+}
+
+.panel {
+    margin-top: 4px;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 200ms ease-out;
+}
+
+.panel[data-transition] {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+.list {
+    list-style: none;
+    padding: 4px;
+    margin: 0;
+}
+
+.list_item,
+.empty_list {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+
+    max-width: 100%;
+
+    cursor: default;
+
+    transition: background-color 0.15s ease;
+}
+
+.list_item:hover,
+.empty_list:hover {
+    background-color: var(--secondary-alpha);
+}
+
+.name_wrapper {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+}
+
+.file_name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+}
+
+.file_ext {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.file_icon {
+    font-size: 0.85rem;
+    color: var(--font-color);
+    flex-shrink: 0;
+}
+
+.delete {
+    background: none;
+    border: none;
+    margin: none;
+    padding: none;
+    font: inherit;
+    cursor: pointer;
+
+    color: #d01010;
+}

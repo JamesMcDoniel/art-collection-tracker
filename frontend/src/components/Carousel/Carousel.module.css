@@ -1,0 +1,125 @@
+.embla {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    width: 300px;
+}
+
+.image_loading {
+    position: relative;
+
+    height: 300px;
+    width: 300px;
+
+    border: 3px dashed #dcdcdc;
+    border-radius: 20px;
+    background-color: #fff;
+}
+
+.viewport {
+    overflow: hidden;
+    width: 100%;
+}
+
+.container {
+    display: flex;
+}
+
+.slide {
+    position: relative;
+    flex: 0 0 100%;
+    min-width: 0;
+}
+
+.slide.new::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+
+    border-radius: 20px;
+
+    box-shadow: inset 0 0 1em 4px var(--secondary-highlight);
+
+    pointer-events: none;
+}
+.slide.new::before {
+    content: 'New';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+
+    padding: 2px 6px;
+
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid #fff;
+    border-radius: 16px;
+    backdrop-filter: blur(4px);
+
+    color: #fff;
+}
+.slide.new:hover::after {
+    content: '';
+    box-shadow: none;
+}
+
+.image {
+    height: 300px;
+    width: 100%;
+    border-radius: 20px;
+
+    object-fit: cover;
+}
+
+.controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    padding-inline: 0.5em;
+}
+
+.buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.buttons button {
+    height: 36px;
+    width: 36px;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+
+    background: #fff;
+    color: var(--font-color);
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.buttons button:not(:disabled):hover {
+    border-color: var(--secondary-highlight);
+}
+
+.buttons button:disabled {
+    cursor: default;
+}
+
+.buttons button.delete:hover {
+    border-color: #d01010;
+    color: #d01010;
+}
+
+.counter {
+    font-size: 0.85rem;
+    color: var(--font-color);
+}
+
+.counter.new_text {
+    color: var(--secondary-color);
+}

@@ -44,20 +44,20 @@ public class ReportService : IReportService
 
         var report = new Report
         {
-            Title = Path.GetFileNameWithoutExtension(filePath),
+            Title = Path.GetFileName(filePath),
             Path = filePath,
             CreatedAt = DateTime.UtcNow,
             ContentType = "application/vnd.openxmlformats-officedocument.spreadsheet.sheet",
             ExternalReport = false,
             OmitEstimates = dto.Filters.OmitEstimates,
 
-            Collection = collection,
-            Category = category,
-            Artist = artist,
-            Medium = medium,
-            Location = location,
-            Loan_Status = loan_status,
-            Donor = donor
+            Collection_Id = collection?.Id,
+            Category_Id = category?.Id,
+            Artist_Id = artist?.Id,
+            Medium_Id = medium?.Id,
+            Location_Id = location?.Id,
+            Loan_Status_Id = loan_status?.Id,
+            Donor_Id = donor?.Id
         };
 
         _context.Report.Add(report);
@@ -85,30 +85,36 @@ public class ReportService : IReportService
         return fullPath;
     }
 
-    public async Task UploadReport(IFormFile file)
+    public async Task UploadReports(List<IFormFile> files)
     {
-        var newPath = Path.Combine(_reportsFolder, file.FileName);
-
-        if (File.Exists(newPath))
+        foreach (var file in files)
         {
-            throw new Exception("Report with this name already exists");
+            if (file.Length == 0) continue;
+
+            var newPath = Path.Combine(_reportsFolder, file.FileName);
+
+            if (File.Exists(newPath))
+            {
+                continue;
+            }
+
+            using (var stream = new FileStream(newPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var report = new Report
+            {
+                Title = Path.GetFileName(newPath),
+                Path = newPath,
+                ContentType = file.ContentType,
+                CreatedAt = DateTime.UtcNow,
+                ExternalReport = true
+            };
+
+            _context.Report.Add(report);
         }
 
-        using (var stream = new FileStream(newPath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
-
-        var report = new Report
-        {
-            Title = Path.GetFileNameWithoutExtension(newPath),
-            Path = newPath,
-            ContentType = file.ContentType,
-            CreatedAt = DateTime.UtcNow,
-            ExternalReport = true
-        };
-
-        _context.Report.Add(report);
         await _context.SaveChangesAsync();
     }
 
@@ -120,6 +126,7 @@ public class ReportService : IReportService
                 Id = report.Id,
                 Title = report.Title,
                 ExternalReport = report.ExternalReport,
+                CreatedAt = report.CreatedAt,
                 OmitEstimates = report.OmitEstimates != null ? report.OmitEstimates : null,
                 Collection = report.Collection != null ? report.Collection.Title : null,
                 Category = report.Category != null ? report.Category.Title : null,
@@ -204,5 +211,19 @@ public class ReportService : IReportService
             ContentType = report.ContentType ?? "application/octet-stream",
             FileName = Path.GetFileName(report.Path)
         };
+    }
+
+    public async Task DeleteReport(int id)
+    {
+        var report = await _context.Report
+            .FirstOrDefaultAsync(report => report.Id == id);
+
+        if (report == null)
+        {
+            throw new Exception("Report not found");
+        }
+
+        _context.Report.Remove(report);
+        await _context.SaveChangesAsync();
     }
 }

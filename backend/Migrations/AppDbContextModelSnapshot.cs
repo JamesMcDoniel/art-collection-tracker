@@ -292,6 +292,73 @@ namespace backend.Migrations
                     b.ToTable("RefreshToken");
                 });
 
+            modelBuilder.Entity("backend.Models.Report", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Artist_Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Category_Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Collection_Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Donor_Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ExternalReport")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Loan_Status_Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Location_Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Medium_Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("OmitEstimates")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Artist_Id");
+
+                    b.HasIndex("Category_Id");
+
+                    b.HasIndex("Collection_Id");
+
+                    b.HasIndex("Donor_Id");
+
+                    b.HasIndex("Loan_Status_Id");
+
+                    b.HasIndex("Location_Id");
+
+                    b.HasIndex("Medium_Id");
+
+                    b.ToTable("Report");
+                });
+
             modelBuilder.Entity("backend.Models.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -338,12 +405,28 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Disabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("FirstName")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("RoleId")
@@ -357,15 +440,6 @@ namespace backend.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("User");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Email = "default_admin",
-                            PasswordHash = "$2a$11$iQFB86E7X6Mrz6FlOh5Z5.FjIe7nCeS6edrMtLqSE4TEreCmyxDRC",
-                            RoleId = 3
-                        });
                 });
 
             modelBuilder.Entity("backend.Models.Artwork", b =>
@@ -453,6 +527,58 @@ namespace backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("backend.Models.Report", b =>
+                {
+                    b.HasOne("backend.Models.Artist", "Artist")
+                        .WithMany("Reports")
+                        .HasForeignKey("Artist_Id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("backend.Models.Category", "Category")
+                        .WithMany("Reports")
+                        .HasForeignKey("Category_Id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("backend.Models.Collection", "Collection")
+                        .WithMany("Reports")
+                        .HasForeignKey("Collection_Id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("backend.Models.Donor", "Donor")
+                        .WithMany("Reports")
+                        .HasForeignKey("Donor_Id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("backend.Models.Loan_Status", "Loan_Status")
+                        .WithMany("Reports")
+                        .HasForeignKey("Loan_Status_Id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("backend.Models.Location", "Location")
+                        .WithMany("Reports")
+                        .HasForeignKey("Location_Id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("backend.Models.Medium", "Medium")
+                        .WithMany("Reports")
+                        .HasForeignKey("Medium_Id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Artist");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Collection");
+
+                    b.Navigation("Donor");
+
+                    b.Navigation("Loan_Status");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Medium");
+                });
+
             modelBuilder.Entity("backend.Models.User", b =>
                 {
                     b.HasOne("backend.Models.Role", "Role")
@@ -467,6 +593,8 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Artist", b =>
                 {
                     b.Navigation("Artworks");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("backend.Models.Artwork", b =>
@@ -477,31 +605,43 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Category", b =>
                 {
                     b.Navigation("Artworks");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("backend.Models.Collection", b =>
                 {
                     b.Navigation("Artworks");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("backend.Models.Donor", b =>
                 {
                     b.Navigation("Artworks");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("backend.Models.Loan_Status", b =>
                 {
                     b.Navigation("Artworks");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("backend.Models.Location", b =>
                 {
                     b.Navigation("Artworks");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("backend.Models.Medium", b =>
                 {
                     b.Navigation("Artworks");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("backend.Models.Role", b =>

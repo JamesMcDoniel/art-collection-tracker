@@ -17,7 +17,7 @@ const Footer = () => {
 
     // Only display on the Login screen
     return location.pathname === '/login' ? (
-        <div className={styles.container}>
+        <footer className={styles.container}>
             <div className={styles.socials}>
                 <a
                     className={styles.social_link}
@@ -116,7 +116,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </footer>
     ) : null;
 };
 

@@ -16,5 +16,5 @@ public class ArtworkResponseDto
     public string? Loan_Status { get; set; }
     public string? Donor { get; set; }
 
-    public List<string> ImagePaths { get; set; } = new List<string>();
+    public List<ImageDto>? Images { get; set; }
 }

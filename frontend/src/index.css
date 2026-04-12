@@ -1,8 +1,10 @@
 :root {
     --primary-color: #0e4c89;
     --primary-highlight: #002855;
+    --primary-alpha: #0e4b8953;
     --secondary-color: #489d46;
     --secondary-highlight: #5cb65a;
+    --secondary-alpha: #5cb65a39;
 
     --font-color: #404041;
 
@@ -16,6 +18,8 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+
+    outline-color: var(--primary-color);
 }
 
 ::selection {
@@ -33,6 +37,8 @@ body {
     font-weight: 300;
     color: var(--font-color);
     line-height: 1.5;
+
+    background-color: rgb(250, 250, 250);
 }
 
 #root {
@@ -44,4 +50,13 @@ img {
     display: block;
     max-width: 100%;
     height: auto;
+}
+
+/* main > *:not(aside) {
+    flex: 1;
+} */
+
+nav > ul > li > a.active {
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
 }

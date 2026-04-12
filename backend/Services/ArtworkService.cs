@@ -35,9 +35,14 @@ public class ArtworkService : IArtworkService
                 Loan_Status = artwork.Loan_Status != null ? artwork.Loan_Status.Status : null,
                 Donor = artwork.Donor != null ? artwork.Donor.Name : null,
 
-                ImagePaths = artwork.Images
-                            .Select(image => "/" + image.Path)
-                            .ToList()
+                Images = artwork.Images
+                    .Where(image => image.Path != null)
+                    .Select(image => new ImageDto
+                    {
+                        Id = image.Id,
+                        Path = $"/{image.Path}"
+                    })
+                    .ToList()
             })
             .ToListAsync();
 
@@ -66,8 +71,13 @@ public class ArtworkService : IArtworkService
                 Loan_Status = artwork.Loan_Status != null ? artwork.Loan_Status.Status : null,
                 Donor = artwork.Donor != null ? artwork.Donor.Name : null,
 
-                ImagePaths = artwork.Images
-                    .Select(image => "/" + image.Path)
+                Images = artwork.Images
+                    .Where(image => image.Path != null)
+                    .Select(image => new ImageDto
+                    {
+                        Id = image.Id,
+                        Path = $"/{image.Path}"
+                    })
                     .ToList()
             })
             .FirstOrDefaultAsync();
@@ -101,18 +111,13 @@ public class ArtworkService : IArtworkService
             Donor = await GetOrCreateDonor(dto.Donor)
         };
 
-        if (dto.Images != null)
-        {
-            await _imageService.UploadArtworkImages(artwork, dto.Images);
-        }
-
         _context.Artwork.Add(artwork);
         await _context.SaveChangesAsync();
 
         return artwork.Id;
     }
 
-    public async Task<Artwork?> UpdateArtwork(int id, ArtworkDto dto)
+    public async Task UpdateArtwork(int id, ArtworkDto dto)
     {
         var artwork = await _context.Artwork
             .FirstOrDefaultAsync(artwork => artwork.Id == id);
@@ -141,10 +146,9 @@ public class ArtworkService : IArtworkService
         artwork.Donor = await GetOrCreateDonor(dto.Donor);
 
         await _context.SaveChangesAsync();
-        return artwork;
     }
 
-    public async Task<Artwork?> UpdateLocation(int id, string? location)
+    public async Task UpdateLocation(int id, string? location)
     {
         var artwork = await _context.Artwork
             .FirstOrDefaultAsync(artwork => artwork.Id == id);
@@ -157,7 +161,6 @@ public class ArtworkService : IArtworkService
         artwork.Location = await GetOrCreateLocation(location);
 
         await _context.SaveChangesAsync();
-        return artwork;
     }
 
     public async Task DeleteArtwork(int id)
@@ -177,53 +180,57 @@ public class ArtworkService : IArtworkService
     // Get All Lookup Table data. Used for filters and Combobox dropdown menus.
     public async Task<FilterDto> GetAllFilters()
     {
-        var collections = _context.Collection
+        var collections = await _context.Collection
+            .AsNoTracking()
             .Select(collection => collection.Title)
             .OrderBy(title => title)
             .ToListAsync();
 
-        var categories = _context.Category
+        var categories = await _context.Category
+            .AsNoTracking()
             .Select(categorie => categorie.Title)
             .OrderBy(title => title)
             .ToListAsync();
 
-        var artists = _context.Artist
+        var artists = await _context.Artist
+            .AsNoTracking()
             .Select(artist => artist.Name)
             .OrderBy(name => name)
             .ToListAsync();
 
-        var mediums = _context.Medium
+        var mediums = await _context.Medium
+            .AsNoTracking()
             .Select(medium => medium.Type)
             .OrderBy(type => type)
             .ToListAsync();
 
-        var locations = _context.Location
+        var locations = await _context.Location
+            .AsNoTracking()
             .Select(location => location.Location_Name)
             .OrderBy(location => location)
             .ToListAsync();
 
-        var loan_statuses = _context.Loan_Status
+        var loan_statuses = await _context.Loan_Status
+            .AsNoTracking()
             .Select(loan_status => loan_status.Status)
             .OrderBy(status => status)
             .ToListAsync();
 
-        var donors = _context.Donor
+        var donors = await _context.Donor
+            .AsNoTracking()
             .Select(donor => donor.Name)
             .OrderBy(name => name)
             .ToListAsync();
 
-        await Task
-            .WhenAll(collections, categories, artists, mediums, locations, loan_statuses, donors);
-
         return new FilterDto
         {
-            Collections = await collections,
-            Categories = await categories,
-            Artists = await artists,
-            Mediums = await mediums,
-            Locations = await locations,
-            Loan_Statuses = await loan_statuses,
-            Donors = await donors
+            Collections = collections,
+            Categories = categories,
+            Artists = artists,
+            Mediums = mediums,
+            Locations = locations,
+            Loan_Statuses = loan_statuses,
+            Donors = donors
         };
     }
 

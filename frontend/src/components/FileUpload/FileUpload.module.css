@@ -1,0 +1,76 @@
+.container {
+    height: 300px;
+    width: 300px;
+}
+
+.label {
+    display: flex;
+
+    position: relative;
+
+    height: 100%;
+    width: 100%;
+
+    cursor: pointer;
+}
+
+.label:has(input:disabled) {
+    cursor: not-allowed;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+
+    padding: 2em;
+
+    border: 3px dashed #dcdcdc;
+    background-color: #fff;
+    border-radius: 20px;
+
+    transition: all 0.2s ease;
+}
+
+.label:has(input:not(:disabled)):hover .wrapper,
+.label:has(input:not(:disabled)).over .wrapper {
+    border-color: var(--secondary-highlight);
+    background-color: var(--secondary-alpha);
+}
+
+.icon {
+    font-size: 4.5rem;
+    margin-bottom: 0.25em;
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+
+    margin-bottom: 0.25em;
+}
+
+.input {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    height: 1px;
+    width: 1px;
+
+    opacity: 0;
+
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.container:focus-within .wrapper {
+    outline: none;
+    border-color: var(--primary-color);
+    border-style: solid;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}

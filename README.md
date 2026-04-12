@@ -46,3 +46,7 @@ MailSettings:AppPassword
 AppSettings:ClientURL
 
 - [STRING] This is the domain / URL of the frontend. i.e. "https://example.com"
+
+AppSettings:PublicFrontendURL
+
+- [STRING] This is the domain / URL of the Public Gallery.

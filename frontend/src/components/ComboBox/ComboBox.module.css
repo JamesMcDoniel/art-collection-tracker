@@ -1,0 +1,125 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    width: 300px;
+}
+
+.wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input {
+    width: 100%;
+
+    padding: 10px 40px 10px 14px;
+
+    background-color: #fff;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    font: inherit;
+    font-size: 0.95rem;
+    cursor: text;
+    transition: all 0.2s ease;
+}
+
+.input.active {
+    border-color: var(--secondary-highlight);
+    background-color: var(--secondary-alpha);
+}
+
+.input[data-hover] {
+    border-color: var(--secondary-highlight);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input:disabled {
+    border-color: #1266b8;
+    background-color: #1266b822;
+    cursor: default;
+
+    & ~ button {
+        display: none;
+    }
+}
+
+.button {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    background: none;
+    border: none;
+
+    color: var(--font-color);
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.options {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 4px;
+    margin-top: 4px;
+    z-index: 100;
+
+    width: var(--input-width);
+
+    transition:
+        opacity 100ms ease-out,
+        transform 100ms ease-out;
+}
+
+.options[data-transition] {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: default;
+    user-select: none;
+    font-size: 0.9rem;
+    color: var(--font-color);
+}
+
+.option[data-focus] {
+    background-color: var(--secondary-alpha);
+    color: var(--font-color);
+    outline: none;
+}
+
+.check {
+    visibility: hidden;
+    color: var(--font-color);
+    font-size: 0.8rem;
+}
+
+.option[data-selected] .check {
+    visibility: visible;
+}
+
+.option_text {
+    flex: 1;
+}

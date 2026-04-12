@@ -20,13 +20,45 @@ namespace backend.Contollers
 
         [Authorize(Roles = "Curator")]
         [ValidateCSRFToken]
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> images)
+        [HttpPost("{id}")]
+        public async Task<IActionResult> UploadImages(int id, [FromForm] List<IFormFile> images)
         {
             try
             {
-                await _imageService.UploadSpreadsheetImages(images);
+                await _imageService.UploadArtworkImages(id, images);
                 return Ok();
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpPost("spreadsheet")]
+        public async Task<IActionResult> UploadSpreadsheetImages([FromForm] IFormFile image)
+        {
+            try
+            {
+                await _imageService.UploadSpreadsheetImages(image);
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [ValidateCSRFToken]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteImages([FromBody] List<int> ids)
+        {
+            try
+            {
+                await _imageService.DeleteArtworkImages(ids);
+                return NoContent();
             }
             catch (Exception exception)
             {

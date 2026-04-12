@@ -50,7 +50,7 @@ namespace backend.Controllers
         [Authorize(Roles = "Curator")]
         [ValidateCSRFToken]
         [HttpPost]
-        public async Task<IActionResult> CreateArtwork([FromForm] ArtworkDto dto)
+        public async Task<IActionResult> CreateArtwork([FromBody] ArtworkDto dto)
         {
             try
             {
@@ -65,8 +65,8 @@ namespace backend.Controllers
 
         [Authorize(Roles = "Curator")]
         [ValidateCSRFToken]
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadArtwork([FromForm] IFormFile file)
+        [HttpPost("spreadsheet")]
+        public async Task<IActionResult> UploadArtworkSpreadsheet([FromForm] IFormFile file)
         {
             try
             {
@@ -82,12 +82,12 @@ namespace backend.Controllers
         [Authorize(Roles = "Curator")]
         [ValidateCSRFToken]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateArtwork(int id, ArtworkDto dto)
+        public async Task<IActionResult> UpdateArtwork(int id, [FromBody] ArtworkDto dto)
         {
             try
             {
-                var response = await _artworkService.UpdateArtwork(id, dto);
-                return Ok(response);
+                await _artworkService.UpdateArtwork(id, dto);
+                return Ok();
             }
             catch (Exception exception)
             {
@@ -127,7 +127,7 @@ namespace backend.Controllers
             }
         }
 
-        [Authorize(Roles = "Curator")]
+        [Authorize(Roles = "Curator,Facilities")]
         [HttpGet("filters")]
         public async Task<IActionResult> GetAllFilters()
         {

@@ -53,9 +53,18 @@ public class ImageService : IImageService
         return newFileName;
     }
 
-    public async Task UploadArtworkImages(Artwork artwork, List<IFormFile> files)
+    public async Task UploadArtworkImages(int id, List<IFormFile> files)
     {
         if (files == null || files.Count == 0) return;
+
+        var artwork = await _context.Artwork
+            .Include(artwork => artwork.Images)
+            .FirstOrDefaultAsync(artwork => artwork.Id == id);
+
+        if (artwork == null)
+        {
+            throw new Exception($"Artwork with ID: {id}, not found");
+        }
 
         foreach (var file in files)
         {
@@ -71,77 +80,66 @@ public class ImageService : IImageService
             }
         }
 
-        // SaveChangesAsync happens in ArtworkController
+        await _context.SaveChangesAsync();
     }
 
-    public async Task UploadSpreadsheetImages(List<IFormFile> files)
+    public async Task DeleteArtworkImages(List<int> imageIds)
     {
-        if (files == null || files.Count == 0)
+        if (imageIds == null || !imageIds.Any())
         {
             return;
         }
 
-        // Create a lookup table instead of querying for each
-        // image.
-        var imageDict = await _context.Image
-            .Where(i => i.Original_Name != null)
-            .ToDictionaryAsync(i => i.Original_Name!);
+        var imagesToDelete = await _context.Image
+            .Where(image => imageIds.Contains(image.Id))
+            .ToListAsync();
 
-        // Keep track of images saved to filesystem, in case transaction
-        // rolls back. Prevents orphaned files.
-        var uploadedFiles = new List<string>();
+        if (!imagesToDelete.Any())
+        {
+            return;
+        }
+
+        _context.Image.RemoveRange(imagesToDelete);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UploadSpreadsheetImages(IFormFile file)
+    {
+        if (file == null || file.Length == 0) return;
+
+        var fileName = Path.GetFileNameWithoutExtension(file.FileName).Trim().Replace(" ", "_").ToLower();
+        var image = await _context.Image.FirstOrDefaultAsync(image => image.Original_Name == fileName);
+
+        if (image == null) return;
 
         using var transaction = await _context.Database.BeginTransactionAsync();
+        string? savedFilePath = null;
 
         try
         {
-            foreach (var file in files)
-            {
-                if (file.Length == 0)
-                {
-                    continue;
-                }
+            var newFileName = await SaveImage(file);
+            if (newFileName == null) throw new Exception("Save Failed");
 
-                // Normalize exactly how it was done when uploading spreadsheet
-                var fileName = Path.GetFileName(file.FileName).Trim().Replace(" ", "_").ToLower();
+            savedFilePath = Path.Combine(_uploadFolder, newFileName);
 
-                if (!imageDict.TryGetValue(fileName, out var image))
-                {
-                    continue;
-                }
-
-                var newFileName = await SaveImage(file);
-
-                if (newFileName == null)
-                {
-                    continue;
-                }
-
-                // Add the full path so Catch block can cleanup if needed
-                uploadedFiles.Add(Path.Combine(_uploadFolder, newFileName));
-
-                image.Path = Path.Combine("uploads", newFileName);
-                image.Embedding = GenerateImageEmbeddings(newFileName);
-                image.Original_Name = null;
-            }
+            image.Path = Path.Combine("uploads", newFileName);
+            image.Embedding = GenerateImageEmbeddings(newFileName);
+            image.Original_Name = null;
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
         }
-        catch (Exception exception)
+        catch
         {
             await transaction.RollbackAsync();
 
-            // Delete any, now, orphaned files
-            foreach (var path in uploadedFiles)
+            // Delete Orphaned file, if one was created
+            if (savedFilePath != null && File.Exists(savedFilePath))
             {
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
+                File.Delete(savedFilePath);
             }
 
-            throw new Exception(exception.Message);
+            throw;
         }
     }
 

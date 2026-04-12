@@ -28,11 +28,16 @@ public class AuthService : IAuthService
             .Include(user => user.RefreshTokens)
             .FirstOrDefaultAsync(user => user.Email == dto.Email);
 
-        // If no user is found, or if provided password doesn't match stored password,
-        // throw exception
+        // User doesn't exist or provided password didn't match stored password hash
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
         {
-            throw new Exception("Invalid credentials");
+            throw new Exception("Invalid email or password");
+        }
+
+        // Login was successful, but account is disabled
+        if (user.Disabled)
+        {
+            throw new Exception("Account disabled - Contact IT");
         }
 
         // Use TokenService to generate a JWT and RefreshToken
@@ -51,33 +56,6 @@ public class AuthService : IAuthService
             Email = user.Email,
             Role = user.Role!.Title
         };
-    }
-
-    public async Task Register(RegisterDto dto)
-    {
-        // Check to see if provided Username already exists in database
-        bool isTaken = await _context.User.AnyAsync(user => user.Email == dto.Email);
-
-        if (isTaken)
-        {
-            throw new Exception("Username already exists");
-        }
-
-        // Salt and Hash password before adding to database
-        string salt = BCrypt.Net.BCrypt.GenerateSalt();
-        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password, salt);
-
-        // Create new User object to store in Database
-        var user = new User
-        {
-            Email = dto.Email,
-            PasswordHash = hashedPassword,
-            RoleId = dto.Role
-        };
-
-        // Store User in database
-        _context.User.Add(user);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<AuthDto> RefreshToken(string token)
@@ -131,6 +109,8 @@ public class AuthService : IAuthService
 
     public async Task RequestPasswordReset(string email)
     {
+        if (email == "default_admin") return;
+
         var user = await _context.User.FirstOrDefaultAsync(user => user.Email == email);
 
         if (user == null)
@@ -145,18 +125,18 @@ public class AuthService : IAuthService
                 passwordReset.ExpiresAt > DateTime.UtcNow)
             .ToListAsync();
 
-        foreach (var t in existingTokens)
+        foreach (var token in existingTokens)
         {
-            t.isUsed = true;
+            token.isUsed = true;
         }
 
         // Generate a random string to use as token
-        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+        var newToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 
         // Save token to database
         var passwordReset = new PasswordReset
         {
-            Token = token,
+            Token = newToken,
             UserId = user.Id,
             ExpiresAt = DateTime.UtcNow.AddHours(1),
             isUsed = false
@@ -166,8 +146,8 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
 
         // Send email to User
-        var resetLink = $"{_clientURL}/reset-password?token={WebUtility.UrlEncode(token)}&email={user.Email}";
-        await _emailService.SendEmail(user.Email, "Reset Password",
+        var resetLink = $"{_clientURL}/reset-password?token={WebUtility.UrlEncode(newToken)}&email={user.Email}";
+        await _emailService.SendEmail(user.Email, "Artwork Tracker - Reset Password",
             $"<p>Click <a href='{resetLink}'>here</a> to reset your password.</p><p>or, Copy and Paste:</p><p>{resetLink}</p>");
     }
 
@@ -201,4 +181,35 @@ public class AuthService : IAuthService
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task Register(RegisterDto dto)
+    {
+        // Check to see if provided Email already exists in database
+        bool isTaken = await _context.User.AnyAsync(user => user.Email == dto.Email);
+
+        if (isTaken)
+        {
+            throw new Exception("Email already in use");
+        }
+
+        // Create new User object to store in Database
+        var user = new User
+        {
+            Email = dto.Email,
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            CreatedAt = DateTime.UtcNow,
+            Disabled = false,
+            Role = dto.Role
+        };
+
+        // Store User in database
+        _context.User.Add(user);
+        await _context.SaveChangesAsync();
+
+        await _emailService.SendEmail(dto.Email, "Artwork Tracker - Account Created",
+            $"<h2>Account Created</h2><p>Login: {dto.Email}</p><p>Click <a href='{_clientURL}/forgot-password'>here</a> to set your password.</p><p>or, copy and paste the link directly:</p><p>{_clientURL}/forgot-password</p>");
+    }
+
+
 }

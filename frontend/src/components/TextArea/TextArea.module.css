@@ -1,0 +1,46 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    width: 300px;
+}
+
+.textarea {
+    width: 100%;
+    padding: 10px 14px;
+
+    background-color: #fff;
+
+    outline: 2px solid #e2e8f0;
+    border: none;
+    border-radius: 8px;
+
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--font-color);
+
+    scrollbar-width: thin;
+    resize: none;
+
+    transition: all 0.2s ease;
+}
+
+.textarea.active {
+    outline-color: var(--secondary-highlight);
+    background-color: var(--secondary-alpha);
+}
+
+.textarea:disabled {
+    outline-color: #1266b8;
+    background-color: #1266b822;
+}
+
+.textarea[data-focus] {
+    outline-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.textarea[data-hover] {
+    outline-color: var(--secondary-highlight);
+}

@@ -5,8 +5,8 @@ public interface IArtworkService
     Task<List<ArtworkResponseDto>> GetAllArtwork();
     Task<ArtworkResponseDto?> GetArtworkById(int id);
     Task<int> CreateArtwork(ArtworkDto dto);
-    Task<Artwork?> UpdateArtwork(int id, ArtworkDto dto);
-    Task<Artwork?> UpdateLocation(int id, string? location);
+    Task UpdateArtwork(int id, ArtworkDto dto);
+    Task UpdateLocation(int id, string? location);
     Task DeleteArtwork(int id);
     Task<FilterDto> GetAllFilters();
 

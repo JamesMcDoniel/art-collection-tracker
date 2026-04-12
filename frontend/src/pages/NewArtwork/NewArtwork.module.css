@@ -1,0 +1,120 @@
+.container {
+    height: calc(100vh - 90px);
+    width: 100vw;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: auto;
+    scrollbar-gutter: stable;
+
+    padding-bottom: 3em;
+
+    @media (max-width: 768px) {
+        & > div.button_row {
+            order: 2;
+        }
+
+        & > form#artwork-form {
+            order: 1;
+        }
+    }
+}
+
+.button_row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+
+    padding-block: 1.5em;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+    }
+
+    & > div:has(~ div) {
+        border-right: 2px solid #e2e8f0;
+        padding-right: 30px;
+        margin-right: 30px;
+
+        @media (max-width: 768px) {
+            border: none;
+            padding: 0;
+            margin: 0;
+
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+        }
+    }
+}
+
+button.update,
+button.delete {
+    width: 135px;
+
+    font: inherit;
+    font-size: 0.95rem;
+
+    padding: 10px 14px;
+
+    background-color: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    transition: border-color 0.2s ease;
+
+    &:first-of-type {
+        margin-right: 30px;
+    }
+
+    &:hover {
+        border-color: var(--secondary-highlight);
+    }
+}
+
+button.delete {
+    &:hover {
+        border-color: #d01010;
+        color: #d01010;
+        background-color: #d0101022;
+    }
+
+    @media (max-width: 768px) {
+        &:first-of-type {
+            margin-right: 0;
+        }
+    }
+}
+
+.flex_container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 5em;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: center;
+
+        padding-top: 2em;
+    }
+}
+
+.flex_child {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.75em;
+}
+
+.flex_child:last-child {
+    justify-content: space-between;
+
+    @media (max-width: 768px) {
+        margin-top: 0.75em;
+        justify-content: normal;
+    }
+}

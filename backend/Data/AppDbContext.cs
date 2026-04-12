@@ -199,17 +199,6 @@ namespace backend.Data
                 new Role { Id = 3, Title = "IT" },
                 new Role { Id = 4, Title = "Guest" }
             );
-
-            // Seed User Table with a Default IT Role Admin Account
-            modelBuilder.Entity<User>().HasData(
-                new User
-                {
-                    Id = 1,
-                    Email = "default_admin",
-                    PasswordHash = "$2a$11$iQFB86E7X6Mrz6FlOh5Z5.FjIe7nCeS6edrMtLqSE4TEreCmyxDRC",
-                    RoleId = 3
-                }
-            );
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken ct = default)

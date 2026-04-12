@@ -15,7 +15,4 @@ public class ArtworkDto
     public string? Location { get; set; }
     public string? Loan_Status { get; set; }
     public string? Donor { get; set; }
-
-    // Uploaded Images
-    public List<IFormFile>? Images { get; set; }
 }

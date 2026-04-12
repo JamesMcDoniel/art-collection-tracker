@@ -1,0 +1,72 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    width: 300px;
+}
+
+.wrapper {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+}
+
+.icon_container {
+    position: absolute;
+    left: 12px;
+    color: var(--font-color);
+    pointer-events: none;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.input {
+    width: 100%;
+    padding: 10px 14px;
+
+    background-color: #fff;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--font-color);
+
+    transition: all 0.2s ease;
+}
+
+.input.active {
+    border-color: var(--secondary-highlight);
+    background-color: var(--secondary-alpha);
+}
+
+.input.with_icon {
+    padding-left: 38px;
+}
+
+.input[data-focus] {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input[data-hover] {
+    border-color: var(--secondary-highlight);
+}
+
+.input:user-invalid {
+    border-color: #d01010;
+}
+
+.input:disabled {
+    border-color: #1266b8;
+    background-color: #1266b822;
+}

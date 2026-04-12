@@ -1,0 +1,26 @@
+.container {
+    padding-bottom: 1em;
+}
+
+.label {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    padding-inline: 0.25em;
+}
+
+.progress_bar {
+    width: 300px;
+    background-color: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 4px;
+}
+
+.progress_fill {
+    height: 0.5em;
+    background-color: var(--secondary-highlight);
+    border-radius: 4px;
+
+    transition: width 0.3s ease;
+}
