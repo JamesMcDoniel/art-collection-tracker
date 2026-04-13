@@ -12,7 +12,7 @@ const NotFound = () => {
         <div className={styles.container}>
             <h1>Not Found</h1>
             <p>
-                The page or resource you're looking for doesn't exist or has
+                The page or resource you're looking for does not exist or has
                 been moved.
             </p>
             <div>

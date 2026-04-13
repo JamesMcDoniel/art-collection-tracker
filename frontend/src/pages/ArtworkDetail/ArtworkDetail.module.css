@@ -50,6 +50,10 @@
     }
 }
 
+.submit_buttons:not(:has(~ div)) {
+    margin-right: 30px;
+}
+
 button.update,
 button.delete {
     width: 135px;
@@ -88,6 +92,10 @@ button.delete {
             margin-right: 0;
         }
     }
+}
+
+.container:not(:has(.button_row)) > form {
+    margin-top: 3em;
 }
 
 .flex_container {

@@ -156,7 +156,7 @@ const ArtworkDetail = () => {
                         {isEditorRole ? (
                             <div className={styles.button_row}>
                                 {hasChanges || hasImagesChanged ? (
-                                    <div>
+                                    <div className={styles.submit_buttons}>
                                         <button
                                             className={styles.update}
                                             type="submit"
