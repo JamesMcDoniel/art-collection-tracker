@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using backend.Data;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -6,12 +5,10 @@ using Microsoft.EntityFrameworkCore;
 public class ArtworkService : IArtworkService
 {
     private readonly AppDbContext _context;
-    private readonly IImageService _imageService;
 
-    public ArtworkService(AppDbContext context, IImageService imageService)
+    public ArtworkService(AppDbContext context)
     {
         _context = context;
-        _imageService = imageService;
     }
 
     public async Task<List<ArtworkResponseDto>> GetAllArtwork()
@@ -188,7 +185,7 @@ public class ArtworkService : IArtworkService
 
         var categories = await _context.Category
             .AsNoTracking()
-            .Select(categorie => categorie.Title)
+            .Select(category => category.Title)
             .OrderBy(title => title)
             .ToListAsync();
 

@@ -2,7 +2,6 @@ using System.Net;
 using System.Security.Cryptography;
 using backend.Data;
 using backend.Models;
-using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 
 public class AuthService : IAuthService
@@ -211,5 +210,77 @@ public class AuthService : IAuthService
             $"<h2>Account Created</h2><p>Login: {dto.Email}</p><p>Click <a href='{_clientURL}/forgot-password'>here</a> to set your password.</p><p>or, copy and paste the link directly:</p><p>{_clientURL}/forgot-password</p>");
     }
 
+    public async Task<List<UserDto>> GetAllUsers()
+    {
+        var users = await _context.User
+            .Select(user => new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role!.Title,
+                Notes = user.Notes != null ? user.Notes : null,
+                CreatedAt = user.CreatedAt,
+                Disabled = user.Disabled
+            })
+            .ToListAsync();
 
+        return users;
+    }
+
+    public async Task UpdateUser(int id, UpdateUserDto dto)
+    {
+        var user = await _context.User
+            .FirstOrDefaultAsync(user => user.Id == id);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        var role = await _context.Role
+            .FirstOrDefaultAsync(role => role.Title == dto.Role);
+
+        if (role == null)
+        {
+            throw new Exception("Role not found");
+        }
+
+        user.Email = dto.Email;
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
+        user.Role = role;
+        user.Notes = dto.Notes;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateDisabled(int id, bool isDisabled)
+    {
+        var user = await _context.User
+            .FirstOrDefaultAsync(user => user.Id == id);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        user.Disabled = isDisabled;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteUser(int id)
+    {
+        var user = await _context.User
+            .FirstOrDefaultAsync(user => user.Id == id);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        _context.User.Remove(user);
+        await _context.SaveChangesAsync();
+    }
 }

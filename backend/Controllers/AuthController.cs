@@ -1,5 +1,4 @@
 using backend.Filters;
-using backend.Models;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -98,6 +97,69 @@ namespace backend.Controllers
             catch (Exception exception)
             {
                 return BadRequest(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "IT")]
+        [HttpGet("users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var users = await _authService.GetAllUsers();
+                return Ok(users);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "IT")]
+        [ValidateCSRFToken]
+        [HttpPut("users/{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
+        {
+            try
+            {
+                await _authService.UpdateUser(id, dto);
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "IT")]
+        [ValidateCSRFToken]
+        [HttpPatch("users/{id}/disabled")]
+        public async Task<IActionResult> UpdateDisabled(int id, UpdateDisabledDto dto)
+        {
+            try
+            {
+                await _authService.UpdateDisabled(id, dto.Disabled);
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "IT")]
+        [ValidateCSRFToken]
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            try
+            {
+                await _authService.DeleteUser(id);
+                return NoContent();
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
             }
         }
 
