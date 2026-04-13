@@ -72,6 +72,8 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ISpreadsheetService, SpreadsheetService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 
+builder.Services.AddHostedService<TokenCleanupService>();
+
 // Configure Controllers
 builder.Services.AddControllers();
 
