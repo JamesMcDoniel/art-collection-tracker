@@ -34,7 +34,13 @@ const ForgotPassword = () => {
                     onChange={setEmail}
                     required
                 />
-                {message ? <p className={styles.message}>{message}</p> : null}
+                <p
+                    className={styles.message}
+                    aria-live="assertive"
+                    aria-label="email-notification"
+                >
+                    {message}
+                </p>
                 <button
                     type="submit"
                     className={styles.submit}

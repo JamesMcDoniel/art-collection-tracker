@@ -68,7 +68,7 @@ public class ReportService : IReportService
 
     public string GenerateReportFile(List<ReportDto> report)
     {
-        var fileName = $"Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
+        var fileName = $"Report_{Guid.NewGuid():N}.xlsx";
         var fullPath = Path.Combine(_reportsFolder, fileName);
 
         using (var workbook = new XLWorkbook())
@@ -126,7 +126,7 @@ public class ReportService : IReportService
                 Id = report.Id,
                 Title = report.Title,
                 ExternalReport = report.ExternalReport,
-                CreatedAt = report.CreatedAt,
+                CreatedAt = DateTime.SpecifyKind(report.CreatedAt, DateTimeKind.Utc),
                 OmitEstimates = report.OmitEstimates != null ? report.OmitEstimates : null,
                 Collection = report.Collection != null ? report.Collection.Title : null,
                 Category = report.Category != null ? report.Category.Title : null,

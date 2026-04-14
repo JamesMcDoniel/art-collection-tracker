@@ -27,7 +27,7 @@
 }
 
 .table_header button,
-.table_rows button {
+.table_rows button:not(.table_listbox_button) {
     display: block;
     height: 100%;
     width: 100%;
@@ -56,7 +56,7 @@
     }
 }
 
-.table_rows td:has(button) {
+.table_rows td:has(button:not(.table_listbox_button)) {
     position: relative;
     text-align: center;
 
@@ -163,4 +163,184 @@ td:has(a.preview_link) {
 
 .delete {
     color: #d01010;
+}
+
+/* Users Table */
+table.users_table thead > tr > th:nth-child(8) {
+    & > svg {
+        display: none;
+    }
+}
+
+table.users_table thead > tr > th:last-child {
+    padding: 12px;
+
+    & > svg {
+        display: none;
+    }
+}
+
+.table_input {
+    width: 100%;
+    padding: 5px 7px;
+
+    background-color: #fff;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    font: inherit;
+    font-size: 1.2rem;
+    color: var(--font-color);
+
+    transition: all 0.2s ease;
+}
+
+.table_input.active {
+    border-color: var(--secondary-highlight);
+    background-color: var(--secondary-alpha);
+}
+
+.table_input[data-focus] {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.table_input[data-hover] {
+    border-color: var(--secondary-highlight);
+}
+
+.table_input.input_error {
+    border-color: #d01010;
+    background-color: #d010101a;
+}
+
+.table_listbox_button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+
+    padding: 5px 7px;
+    background-color: #fff;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 1.2rem;
+    color: var(--font-color);
+
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: var(--secondary-highlight);
+    }
+}
+
+.table_listbox_button.active {
+    border-color: var(--secondary-highlight);
+    background-color: var(--secondary-alpha);
+}
+
+.table_listbox_button[data-active],
+.table_listbox_button:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.table_listbox_options {
+    background-color: white;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    padding: 4px;
+    margin-top: 4px;
+
+    width: var(--button-width);
+    z-index: 800;
+
+    transition:
+        opacity 100ms ease-out,
+        transform 100ms ease-out;
+}
+
+.table_listbox_options[data-transition] {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.table_listbox_option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    cursor: default;
+    user-select: none;
+
+    font-size: 1.2rem;
+    color: var(--font-color);
+}
+
+.table_listbox_option[data-focus] {
+    background-color: var(--secondary-alpha);
+    color: var(--font-color);
+    outline: none;
+}
+
+.table_listbox_option .table_listbox_check {
+    visibility: hidden;
+    color: var(--font-color);
+    font-size: 0.8rem;
+}
+
+.table_listbox_option[data-selected] .table_listbox_check {
+    visibility: visible;
+}
+
+.table_listbox_option_text {
+    flex: 1;
+}
+
+.edit_controls {
+    display: flex;
+    flex-direction: row;
+}
+
+.edit_controls > button:first-of-type {
+    &:hover {
+        color: var(--secondary-highlight);
+    }
+    &::after {
+        content: '';
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 50%;
+    }
+}
+
+.edit_controls > button:last-of-type {
+    &:hover {
+        color: #d01010;
+    }
+    &::after {
+        content: '';
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        right: 0;
+    }
 }

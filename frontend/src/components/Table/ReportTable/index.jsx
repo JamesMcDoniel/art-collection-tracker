@@ -8,6 +8,7 @@ import {
     faArrowUpRightFromSquare,
     faDownload
 } from '@fortawesome/free-solid-svg-icons';
+import { formatDate } from '../../../helpers/date';
 import styles from '../Table.module.css';
 
 const columns = [
@@ -70,7 +71,7 @@ const ReportTable = ({ data }) => {
                         ) : null}
                     </td>
                     <td>{report.title}</td>
-                    <td>{report.createdAt}</td>
+                    <td>{formatDate(report.createdAt)}</td>
                     <td>{report.collection}</td>
                     <td>{report.category}</td>
                     <td>{report.artist}</td>

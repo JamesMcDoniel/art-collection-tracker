@@ -71,10 +71,5 @@ export const fetchWrapper = async (url, options = {}) => {
         }
     }
 
-    // If there's a different error not handled above, throw it
-    if (!response.ok) {
-        throw new Error(response.status);
-    }
-
     return response;
 };

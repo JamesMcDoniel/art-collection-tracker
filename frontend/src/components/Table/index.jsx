@@ -9,6 +9,7 @@ import styles from './Table.module.css';
 export const TableHeader = memo(({ title, sort, handleSort }) => {
     return (
         <th
+            id={`col-${title}`}
             scope="col"
             aria-sort={sort.column === title ? sort.direction : 'none'}
         >

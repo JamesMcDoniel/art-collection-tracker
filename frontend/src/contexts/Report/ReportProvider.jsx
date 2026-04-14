@@ -29,7 +29,7 @@ export const ReportProvider = ({ children }) => {
     }, [authFetch]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || user.role !== 'Curator') return;
 
         fetchReports();
     }, [user, fetchReports]);

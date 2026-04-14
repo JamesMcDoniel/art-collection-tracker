@@ -1,0 +1,123 @@
+.container {
+    position: relative;
+    z-index: 900;
+}
+
+.container.firstName input[name='firstName'],
+.container.lastName input[name='lastName'],
+.container.role button[aria-haspopup='listbox'] {
+    border-color: #d01010;
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+
+    background-color: rgba(15, 23, 42, 0.4);
+
+    transition: opacity 0.3s ease-out;
+}
+
+.backdrop[data-closed] {
+    opacity: 0;
+}
+
+.wrapper {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.panel {
+    position: relative;
+    width: fit-content;
+
+    background-color: rgb(250, 250, 250);
+    border: 2px solid #e2e8f0;
+
+    padding: 32px;
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    transition: all 0.3s ease-out;
+
+    @media (max-width: 768px) {
+        height: 100%;
+        width: 100%;
+
+        border-radius: 0;
+    }
+}
+
+.panel[data-closed] {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.title {
+    font-family: var(--secondary-font);
+    font-size: 1.8rem;
+    letter-spacing: 1.5px;
+    text-align: center;
+
+    margin-bottom: 0.75em;
+}
+
+.form,
+.success_content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+.error {
+    font-weight: 400;
+    color: #d01010;
+    min-height: 1.5em;
+    text-align: center;
+}
+
+.buttons {
+    width: 300px;
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 30px;
+}
+
+.button {
+    width: 135px;
+
+    font: inherit;
+    font-size: 0.95rem;
+
+    padding: 10px 14px;
+
+    background-color: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    transition: border-color 0.2s ease;
+
+    &:hover {
+        border-color: var(--secondary-highlight);
+    }
+}
+
+.success_content {
+    width: 300px;
+}
+
+.success_content p {
+    font-weight: 400;
+}
+
+.success_content > button {
+    margin-top: 1em;
+}

@@ -229,7 +229,7 @@ public class AuthService : IAuthService
                 LastName = user.LastName,
                 Role = user.Role!.Title,
                 Notes = user.Notes != null ? user.Notes : null,
-                CreatedAt = user.CreatedAt,
+                CreatedAt = DateTime.SpecifyKind(user.CreatedAt, DateTimeKind.Utc),
                 Disabled = user.Disabled
             })
             .ToListAsync();

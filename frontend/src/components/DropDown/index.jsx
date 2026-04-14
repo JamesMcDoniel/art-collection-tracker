@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faCheck } from '@fortawesome/free-solid-svg-icons';
 import styles from './DropDown.module.css';
 
-const DropDown = ({ label, list, value, onChange }) => {
+const DropDown = ({ label, list, value, onChange, hasNone = true }) => {
     const options = list || [];
 
     return (
@@ -34,16 +34,18 @@ const DropDown = ({ label, list, value, onChange }) => {
                     transition
                     className={styles.options}
                 >
-                    <ListboxOption
-                        value=""
-                        className={styles.option}
-                    >
-                        <FontAwesomeIcon
-                            icon={faCheck}
-                            className={styles.check}
-                        />
-                        <div className={styles.option_text}>None</div>
-                    </ListboxOption>
+                    {hasNone ? (
+                        <ListboxOption
+                            value=""
+                            className={styles.option}
+                        >
+                            <FontAwesomeIcon
+                                icon={faCheck}
+                                className={styles.check}
+                            />
+                            <div className={styles.option_text}>None</div>
+                        </ListboxOption>
+                    ) : null}
                     {options.map((option) => (
                         <ListboxOption
                             key={option}

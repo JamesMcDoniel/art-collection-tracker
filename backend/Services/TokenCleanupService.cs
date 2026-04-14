@@ -35,7 +35,7 @@ public class TokenCleanupService : BackgroundService
 
         var resetCutoff = now.AddDays(-1);
         await context.PasswordReset
-            .Where(passwordReset => passwordReset.isUsed || passwordReset.ExpiresAt < now)
+            .Where(passwordReset => passwordReset.IsUsed || passwordReset.ExpiresAt < now)
             .ExecuteDeleteAsync();
     }
 }

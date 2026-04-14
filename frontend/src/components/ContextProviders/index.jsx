@@ -3,6 +3,7 @@ import { AuthProvider } from '../../contexts/Auth/AuthProvider';
 import { ArtworkProvider } from '../../contexts/Artwork/ArtworkProvider';
 import { ReportProvider } from '../../contexts/Report/ReportProvider';
 import { MobileProvider } from '../../contexts/Mobile/MobileProvider';
+import { UserProvider } from '../../contexts/User/UserProvider';
 
 const ContextProviders = ({ children }) => {
     return (
@@ -10,7 +11,9 @@ const ContextProviders = ({ children }) => {
             <MobileProvider>
                 <BrowserRouter>
                     <ArtworkProvider>
-                        <ReportProvider>{children}</ReportProvider>
+                        <ReportProvider>
+                            <UserProvider>{children}</UserProvider>
+                        </ReportProvider>
                     </ArtworkProvider>
                 </BrowserRouter>
             </MobileProvider>

@@ -61,7 +61,13 @@ const ResetPassword = () => {
                     onChange={setConfirmPassword}
                     required
                 />
-                {error ? <p className={styles.message}>{error}</p> : null}
+                <p
+                    className={styles.message}
+                    aria-live="assertive"
+                    aria-label="reset-status"
+                >
+                    {error}
+                </p>
                 <button
                     type="submit"
                     className={styles.submit}

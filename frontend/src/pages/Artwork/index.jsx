@@ -69,12 +69,16 @@ const Artwork = () => {
                         filterOptions={ArtworkFields}
                         onSearch={handleSearch}
                     />
-                    <div className={styles.search_separator} />
-                    <SplitButton
-                        label="New"
-                        onClick={handleMenuClick}
-                        options={menuOptions}
-                    />
+                    {user.role === 'Curator' ? (
+                        <>
+                            <div className={styles.search_separator} />
+                            <SplitButton
+                                label="New"
+                                onClick={handleMenuClick}
+                                options={menuOptions}
+                            />
+                        </>
+                    ) : null}
                 </div>
                 <div className={styles.table_container}>
                     <ArtworkTable data={filteredArtworks} />
