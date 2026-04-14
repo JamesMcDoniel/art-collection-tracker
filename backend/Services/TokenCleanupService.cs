@@ -24,7 +24,7 @@ public class TokenCleanupService : BackgroundService
         using var scope = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.UtcNow;
 
         var refreshCutoff = now.AddDays(-7);
         await context.RefreshToken

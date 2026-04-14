@@ -72,7 +72,7 @@ public class AuthService : IAuthService
         }
 
         // Revoke the found token, we're going to rotate tokens now
-        refreshToken.RevokedAt = DateTimeOffset.UtcNow;
+        refreshToken.RevokedAt = DateTime.UtcNow;
 
         // Create a new pair of JWT and RefreshToken
         var newRefreshToken = _tokenService.CreateRefreshToken();
@@ -101,7 +101,7 @@ public class AuthService : IAuthService
         if (refreshToken != null)
         {
             // Edit the token's revoked date, revoking it
-            refreshToken.RevokedAt = DateTimeOffset.UtcNow;
+            refreshToken.RevokedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
     }
@@ -120,13 +120,13 @@ public class AuthService : IAuthService
         // Invalidate any existing active tokens
         var existingTokens = await _context.PasswordReset
             .Where(passwordReset => passwordReset.UserId == user.Id &&
-                !passwordReset.isUsed &&
-                passwordReset.ExpiresAt > DateTimeOffset.UtcNow)
+                !passwordReset.IsUsed &&
+                passwordReset.ExpiresAt > DateTime.UtcNow)
             .ToListAsync();
 
         foreach (var token in existingTokens)
         {
-            token.isUsed = true;
+            token.IsUsed = true;
         }
 
         // Generate a random string to use as token
@@ -137,8 +137,8 @@ public class AuthService : IAuthService
         {
             Token = newToken,
             UserId = user.Id,
-            ExpiresAt = DateTimeOffset.UtcNow.AddHours(1),
-            isUsed = false
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            IsUsed = false
         };
 
         _context.PasswordReset.Add(passwordReset);
@@ -165,8 +165,8 @@ public class AuthService : IAuthService
         // Find the current token
         var previousToken = user.PasswordResets.FirstOrDefault(passwordReset =>
             passwordReset.Token == token &&
-            !passwordReset.isUsed &&
-            passwordReset.ExpiresAt > DateTimeOffset.UtcNow);
+            !passwordReset.IsUsed &&
+            passwordReset.ExpiresAt > DateTime.UtcNow);
 
         if (previousToken == null)
         {
@@ -176,7 +176,7 @@ public class AuthService : IAuthService
         // Update Password & void the Reset token
         var salt = BCrypt.Net.BCrypt.GenerateSalt();
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword, salt);
-        previousToken.isUsed = true;
+        previousToken.IsUsed = true;
 
         await _context.SaveChangesAsync();
     }
@@ -205,7 +205,7 @@ public class AuthService : IAuthService
             Email = dto.Email,
             FirstName = dto.FirstName,
             LastName = dto.LastName,
-            CreatedAt = DateTimeOffset.UtcNow,
+            CreatedAt = DateTime.UtcNow,
             Disabled = false,
             Role = role
         };

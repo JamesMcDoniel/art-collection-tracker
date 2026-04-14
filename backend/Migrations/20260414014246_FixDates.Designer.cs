@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -10,9 +11,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414014246_FixDates")]
+    partial class FixDates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -243,14 +246,14 @@ namespace backend.Migrations
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("isUsed")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
