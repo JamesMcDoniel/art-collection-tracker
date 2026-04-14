@@ -32,7 +32,7 @@ public class TokenService : ITokenService
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(15),
+            expires: DateTimeOffset.UtcNow.AddMinutes(15),
             signingCredentials: credentials
         );
 
@@ -44,8 +44,8 @@ public class TokenService : ITokenService
         return new RefreshToken
         {
             Token = Guid.NewGuid().ToString(),
-            CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            CreatedAt = DateTimeOffset.UtcNow,
+            ExpiresAt = DateTimeOffset.UtcNow.AddDays(7)
         };
     }
 }

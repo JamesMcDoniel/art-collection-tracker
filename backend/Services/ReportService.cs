@@ -46,7 +46,7 @@ public class ReportService : IReportService
         {
             Title = Path.GetFileName(filePath),
             Path = filePath,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTimeOffset.UtcNow,
             ContentType = "application/vnd.openxmlformats-officedocument.spreadsheet.sheet",
             ExternalReport = false,
             OmitEstimates = dto.Filters.OmitEstimates,
@@ -68,12 +68,12 @@ public class ReportService : IReportService
 
     public string GenerateReportFile(List<ReportDto> report)
     {
-        var fileName = $"Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
+        var fileName = $"Report_{DateTimeOffset.UtcNow:yyyyMMdd_HHmmss}.xlsx";
         var fullPath = Path.Combine(_reportsFolder, fileName);
 
         using (var workbook = new XLWorkbook())
         {
-            var worksheet = workbook.Worksheets.Add(DateTime.Now.ToString("yyyy-MM-dd"));
+            var worksheet = workbook.Worksheets.Add(DateTimeOffset.Now.ToString("yyyy-MM-dd"));
 
             // WTF!? This automatically builds the headers based off my objects'
             // properties, then adds the data of the objects as rows. It's that easy!
@@ -108,7 +108,7 @@ public class ReportService : IReportService
                 Title = Path.GetFileName(newPath),
                 Path = newPath,
                 ContentType = file.ContentType,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow,
                 ExternalReport = true
             };
 

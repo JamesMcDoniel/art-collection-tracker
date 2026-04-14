@@ -7,7 +7,7 @@ namespace backend.Models
         public string Path { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty;
         public bool ExternalReport { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
         public bool? OmitEstimates { get; set; }
 
         // Foreign Keys

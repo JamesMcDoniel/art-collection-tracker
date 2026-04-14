@@ -4,10 +4,10 @@ namespace backend.Models
     {
         public int Id { get; set; } // PK
         public string Token { get; set; } = string.Empty;
-        public DateTime ExpiresAt { get; set; }
+        public DateTimeOffset ExpiresAt { get; set; }
         public bool isUsed { get; set; }
 
-        public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
+        public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
 
         // Foreign Key
         public int UserId { get; set; }

@@ -33,7 +33,7 @@ namespace backend.Controllers
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddMinutes(15)
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(15)
                 });
 
                 Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
@@ -41,7 +41,7 @@ namespace backend.Controllers
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(7)
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
                 Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
@@ -49,7 +49,7 @@ namespace backend.Controllers
                     HttpOnly = false, // We want frontend to read this one
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(8)
+                    Expires = DateTimeOffset.UtcNow.AddDays(8)
                 });
 
                 return Ok(new SessionDto
@@ -185,7 +185,7 @@ namespace backend.Controllers
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddMinutes(15)
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(15)
                 });
 
                 Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
@@ -193,7 +193,7 @@ namespace backend.Controllers
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(7)
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
                 Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
@@ -201,7 +201,7 @@ namespace backend.Controllers
                     HttpOnly = false, // We want frontend to read this one
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(8)
+                    Expires = DateTimeOffset.UtcNow.AddDays(8)
                 });
 
                 return Ok(new SessionDto

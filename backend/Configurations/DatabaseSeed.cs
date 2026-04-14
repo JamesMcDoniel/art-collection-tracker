@@ -13,7 +13,7 @@ public static class DatabaseSeed
                 PasswordHash = "$2a$11$iQFB86E7X6Mrz6FlOh5Z5.FjIe7nCeS6edrMtLqSE4TEreCmyxDRC",
                 FirstName = "Default",
                 LastName = "Admin",
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow,
                 Disabled = false,
                 RoleId = 3
             });

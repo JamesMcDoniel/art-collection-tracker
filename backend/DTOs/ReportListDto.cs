@@ -5,7 +5,7 @@ public class ReportListDto
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public bool ExternalReport { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
     public bool? OmitEstimates { get; set; }
 
     public string? Collection { get; set; }

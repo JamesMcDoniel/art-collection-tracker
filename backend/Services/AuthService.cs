@@ -72,7 +72,7 @@ public class AuthService : IAuthService
         }
 
         // Revoke the found token, we're going to rotate tokens now
-        refreshToken.RevokedAt = DateTime.UtcNow;
+        refreshToken.RevokedAt = DateTimeOffset.UtcNow;
 
         // Create a new pair of JWT and RefreshToken
         var newRefreshToken = _tokenService.CreateRefreshToken();
@@ -101,7 +101,7 @@ public class AuthService : IAuthService
         if (refreshToken != null)
         {
             // Edit the token's revoked date, revoking it
-            refreshToken.RevokedAt = DateTime.UtcNow;
+            refreshToken.RevokedAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
         }
     }
@@ -121,7 +121,7 @@ public class AuthService : IAuthService
         var existingTokens = await _context.PasswordReset
             .Where(passwordReset => passwordReset.UserId == user.Id &&
                 !passwordReset.isUsed &&
-                passwordReset.ExpiresAt > DateTime.UtcNow)
+                passwordReset.ExpiresAt > DateTimeOffset.UtcNow)
             .ToListAsync();
 
         foreach (var token in existingTokens)
@@ -137,7 +137,7 @@ public class AuthService : IAuthService
         {
             Token = newToken,
             UserId = user.Id,
-            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            ExpiresAt = DateTimeOffset.UtcNow.AddHours(1),
             isUsed = false
         };
 
@@ -166,7 +166,7 @@ public class AuthService : IAuthService
         var previousToken = user.PasswordResets.FirstOrDefault(passwordReset =>
             passwordReset.Token == token &&
             !passwordReset.isUsed &&
-            passwordReset.ExpiresAt > DateTime.UtcNow);
+            passwordReset.ExpiresAt > DateTimeOffset.UtcNow);
 
         if (previousToken == null)
         {
@@ -191,15 +191,23 @@ public class AuthService : IAuthService
             throw new Exception("Email already in use");
         }
 
+        var role = await _context.Role
+            .FirstOrDefaultAsync(role => role.Title == dto.Role);
+
+        if (role == null)
+        {
+            throw new Exception("Invalid role");
+        }
+
         // Create new User object to store in Database
         var user = new User
         {
             Email = dto.Email,
             FirstName = dto.FirstName,
             LastName = dto.LastName,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTimeOffset.UtcNow,
             Disabled = false,
-            Role = dto.Role
+            Role = role
         };
 
         // Store User in database
