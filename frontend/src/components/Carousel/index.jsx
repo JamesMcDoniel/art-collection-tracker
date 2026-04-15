@@ -6,6 +6,7 @@ import {
     faChevronRight,
     faXmark
 } from '@fortawesome/free-solid-svg-icons';
+import { faImages } from '@fortawesome/free-regular-svg-icons';
 import { useArtworkContext } from '../../hooks/useArtworkContext';
 import FileUpload from '../FileUpload';
 import Loading from '../Loading';
@@ -24,10 +25,6 @@ const Carousel = ({
     const [scrollSnaps, setScrollSnaps] = useState([]);
     const { isLoading } = useArtworkContext();
 
-    const scrollTo = useCallback(
-        (index) => emblaApi?.scrollTo(index, true),
-        [emblaApi]
-    );
     const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
     const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
@@ -57,7 +54,6 @@ const Carousel = ({
 
     const handleUpload = (e) => {
         onUpload(e);
-        scrollTo(0);
     };
 
     return (
@@ -68,22 +64,33 @@ const Carousel = ({
                     ref={emblaRef}
                 >
                     <div className={styles.container}>
-                        {images.map((image, index) => {
-                            const isNew = !image.path.startsWith('/uploads');
-
-                            return (
-                                <div
-                                    key={image.path}
-                                    className={`${styles.slide} ${isNew ? styles.new : ''}`.trim()}
-                                >
-                                    <img
-                                        className={styles.image}
-                                        src={image.path}
-                                        alt={`Image ${index + 1} of ${images.length} - ${title}`}
-                                    />
+                        {images.length === 0 && authRole !== 'Curator' ? (
+                            <div className={styles.slide}>
+                                <div className={styles.no_images}>
+                                    <span>No</span>
+                                    <FontAwesomeIcon icon={faImages} />
+                                    <span>Images</span>
                                 </div>
-                            );
-                        })}
+                            </div>
+                        ) : (
+                            images.map((image, index) => {
+                                const isNew =
+                                    !image.path.startsWith('/uploads');
+
+                                return (
+                                    <div
+                                        key={image.path}
+                                        className={`${styles.slide} ${isNew ? styles.new : ''}`.trim()}
+                                    >
+                                        <img
+                                            className={styles.image}
+                                            src={image.path}
+                                            alt={`Image ${index + 1} of ${images.length} - ${title}`}
+                                        />
+                                    </div>
+                                );
+                            })
+                        )}
                         {authRole === 'Curator' ? (
                             <div className={styles.slide}>
                                 <FileUpload
@@ -106,19 +113,19 @@ const Carousel = ({
                     <button
                         type="button"
                         onClick={scrollPrev}
-                        disabled={isLoading.upload}
+                        disabled={isLoading.upload || images.length === 0}
                     >
                         <FontAwesomeIcon icon={faChevronLeft} />
                     </button>
                     <button
                         type="button"
                         onClick={scrollNext}
-                        disabled={isLoading.upload}
+                        disabled={isLoading.upload || images.length === 0}
                     >
                         <FontAwesomeIcon icon={faChevronRight} />
                     </button>
                 </div>
-                {showControls ? (
+                {showControls && images.length !== 0 ? (
                     <>
                         <div
                             className={`${styles.counter} ${hasChanged ? styles.new_text : ''}`.trim()}
@@ -129,7 +136,9 @@ const Carousel = ({
                             <div className={styles.buttons}>
                                 <button
                                     className={styles.delete}
+                                    type="button"
                                     onClick={() => onDelete(currentImage)}
+                                    disabled={isLoading.upload}
                                 >
                                     <FontAwesomeIcon icon={faXmark} />
                                 </button>

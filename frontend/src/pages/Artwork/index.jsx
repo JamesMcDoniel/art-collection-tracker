@@ -122,8 +122,8 @@ const Artwork = () => {
                     <div className={styles.empty}>
                         <h2>No Artwork Found</h2>
                         <p>
-                            No artwork found. This could be due to a connection
-                            error or because nothing has been uploaded yet.
+                            This could be due to a connection error or because
+                            nothing has been uploaded yet.
                         </p>
                         <p>Please try again later</p>
                     </div>

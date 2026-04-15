@@ -224,9 +224,9 @@ namespace backend.Controllers
                 await _authService.RequestPasswordReset(dto.Email);
                 return Ok();
             }
-            catch (Exception exception)
+            catch
             {
-                return Unauthorized(exception.Message);
+                return Ok();
             }
         }
 

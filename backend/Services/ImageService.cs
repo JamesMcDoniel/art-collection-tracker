@@ -53,9 +53,9 @@ public class ImageService : IImageService
         return newFileName;
     }
 
-    public async Task UploadArtworkImages(int id, List<IFormFile> files)
+    public async Task UploadArtworkImage(int id, IFormFile file)
     {
-        if (files == null || files.Count == 0) return;
+        if (file == null || file.Length == 0) return;
 
         var artwork = await _context.Artwork
             .Include(artwork => artwork.Images)
@@ -66,21 +66,30 @@ public class ImageService : IImageService
             throw new Exception($"Artwork with ID: {id}, not found");
         }
 
-        foreach (var file in files)
+        var fileName = await SaveImage(file);
+
+        if (fileName != null)
         {
-            var fileName = await SaveImage(file);
-
-            if (fileName != null)
+            artwork.Images.Add(new Image
             {
-                artwork.Images.Add(new Image
-                {
-                    Path = Path.Combine("uploads", fileName),
-                    Embedding = GenerateImageEmbeddings(fileName)
-                });
-            }
-        }
+                Path = Path.Combine("uploads", fileName),
+                Embedding = GenerateImageEmbeddings(fileName)
+            });
 
-        await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<List<ImageDto>> GetImagesByArtworkId(int id)
+    {
+        return await _context.Image
+            .Where(image => image.Artwork_Id == id && image.Path != null)
+            .Select(image => new ImageDto
+            {
+                Id = image.Id,
+                Path = $"/{image.Path}"
+            })
+            .ToListAsync();
     }
 
     public async Task DeleteArtworkImages(List<int> imageIds)
@@ -103,7 +112,7 @@ public class ImageService : IImageService
         await _context.SaveChangesAsync();
     }
 
-    public async Task UploadSpreadsheetImages(IFormFile file)
+    public async Task UploadSpreadsheetImage(IFormFile file)
     {
         if (file == null || file.Length == 0) return;
 

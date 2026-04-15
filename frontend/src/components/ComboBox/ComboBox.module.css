@@ -34,7 +34,8 @@
     background-color: var(--secondary-alpha);
 }
 
-.input[data-hover] {
+.input[data-hover],
+.input:has(~ .button[data-hover]) {
     border-color: var(--secondary-highlight);
 }
 

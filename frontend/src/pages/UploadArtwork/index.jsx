@@ -27,6 +27,7 @@ const UploadArtwork = () => {
 
         if (spreadsheet.files.length === 1) {
             await uploadSpreadsheetArtwork(spreadsheet.files[0]);
+            spreadsheet.resetFiles();
         }
     };
 

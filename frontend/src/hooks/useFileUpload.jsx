@@ -64,6 +64,10 @@ export const useFileUpload = ({ mime, ext }) => {
         setFiles((prev) => prev.filter((file) => file.name !== name));
     }, []);
 
+    const resetFiles = useCallback(() => {
+        setFiles([]);
+    }, []);
+
     const handleReportUpload = useCallback(
         async (e) => {
             e.preventDefault();
@@ -103,8 +107,6 @@ export const useFileUpload = ({ mime, ext }) => {
                     { type: 'image/webp' }
                 );
 
-                console.log(webpFile);
-
                 const formData = new FormData();
                 formData.append('image', webpFile);
 
@@ -134,6 +136,7 @@ export const useFileUpload = ({ mime, ext }) => {
         files,
         progress,
         isUploading,
+        resetFiles,
         handleFileChange,
         handleFileDrop,
         handleRemoveFile,

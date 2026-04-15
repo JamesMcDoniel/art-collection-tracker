@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuthContext } from './useAuthContext';
 
 export const useCarousel = () => {
     const [storedImages, setStoredImages] = useState([]);
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [deletedImages, setDeletedImages] = useState([]);
+    const { authFetch } = useAuthContext();
 
     useEffect(() => {
         return () => {
@@ -24,7 +26,7 @@ export const useCarousel = () => {
             isNew: true
         }));
 
-        return [...uploaded, ...current];
+        return [...current, ...uploaded];
     }, [storedImages, uploadedFiles]);
 
     const hasChanges = useMemo(() => {
@@ -88,6 +90,27 @@ export const useCarousel = () => {
         setDeletedImages([]);
     }, []);
 
+    const fetchImagesByArtworkId = useCallback(
+        async (id) => {
+            try {
+                const response = await authFetch(`/api/image/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setCarouselState([...data]);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        [authFetch, setCarouselState]
+    );
+
     return {
         images,
         uploadedFiles: uploadedFiles.map((file) => file.file), // I only want the file to send to DB
@@ -95,6 +118,7 @@ export const useCarousel = () => {
         hasChanges,
         handleUpload,
         handleDelete,
+        fetchImagesByArtworkId,
         setCarouselState
     };
 };

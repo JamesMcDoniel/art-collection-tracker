@@ -42,6 +42,7 @@ const ArtworkDetail = () => {
         fetchArtworkById,
         updateArtwork,
         updateLocation,
+        deleteArtwork,
         uploadImages,
         deleteImages
     } = useArtworkContext();
@@ -52,6 +53,7 @@ const ArtworkDetail = () => {
         hasChanges: hasImagesChanged,
         handleUpload,
         handleDelete,
+        fetchImagesByArtworkId,
         setCarouselState
     } = useCarousel();
     const { user } = useAuthContext();
@@ -126,9 +128,8 @@ const ArtworkDetail = () => {
             }
 
             if (deletedImages.length > 0 || uploadedFiles.length > 0) {
-                // const response = await getImages(id);
-                // setCarouselState(response);
-                console.log('Should Re-Fetch Images');
+                // Reset StoredImages
+                await fetchImagesByArtworkId(id);
             }
 
             // Update Artwork Table
@@ -137,20 +138,27 @@ const ArtworkDetail = () => {
                 dispatch({ type: 'SET_INITIAL', payload: state.current });
             }
         } else if (user.role === 'Facilities') {
-            console.log('Facilities');
-
             await updateLocation(id, state.current.location);
             dispatch({ type: 'SET_INITIAL', payload: state.current });
         }
     };
 
-    const handleCancel = () => {
+    const handleCancel = async () => {
+        if (deletedImages.length > 0 || uploadedFiles.length > 0) {
+            // Reset StoredImages
+            await fetchImagesByArtworkId(id);
+        }
+
         dispatch({ type: 'RESET' });
+    };
+
+    const handleDeleteArtwork = async () => {
+        await deleteArtwork(id);
     };
 
     return (
         <section className={styles.container}>
-            {!isLoading.filter && !isLoading.artwork ? (
+            {!isLoading.filter && !isLoading.artwork && !isLoading.artworks ? (
                 state.current && state.initial ? (
                     <>
                         {isEditorRole ? (
@@ -178,6 +186,7 @@ const ArtworkDetail = () => {
                                         <button
                                             className={styles.delete}
                                             type="button"
+                                            onClick={handleDeleteArtwork}
                                         >
                                             Delete
                                         </button>

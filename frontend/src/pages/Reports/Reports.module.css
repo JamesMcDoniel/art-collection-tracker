@@ -104,6 +104,11 @@
 
     height: 90px;
     border-bottom: 1px solid rgb(160, 160, 160);
+
+    @media (max-width: 768px) {
+        height: 155px;
+        gap: 1em;
+    }
 }
 
 .table_container {
@@ -114,6 +119,7 @@
     overflow: scroll;
 
     @media (max-width: 768px) {
+        height: calc(100vh - 90px - 155px);
         width: 100vw;
     }
 }

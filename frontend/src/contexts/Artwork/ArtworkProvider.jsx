@@ -16,6 +16,7 @@ export const ArtworkProvider = ({ children }) => {
     const navigate = useNavigate();
 
     const fetchArtworks = useCallback(async () => {
+        setIsLoading((prev) => ({ ...prev, artworks: true }));
         try {
             const response = await authFetch('/api/artwork', {
                 method: 'GET',
@@ -53,6 +54,7 @@ export const ArtworkProvider = ({ children }) => {
                     }
                 });
                 const data = await response.json();
+
                 setFilters(data);
             } catch (error) {
                 console.log(error);
@@ -63,7 +65,7 @@ export const ArtworkProvider = ({ children }) => {
         };
 
         fetchFilters();
-    }, [authFetch, user]);
+    }, [authFetch, user, artworks]);
 
     const fetchArtworkById = useCallback(
         async (id) => {
@@ -103,22 +105,50 @@ export const ArtworkProvider = ({ children }) => {
                 });
 
                 if (artworkResponse.ok) {
-                    // ArtworkResponse returns it's Artwork.Id
+                    // ArtworkResponse returns its Artwork.Id
                     const id = await artworkResponse.json();
 
                     if (images.length > 0) {
-                        const formData = new FormData();
-                        images.forEach((file) => {
-                            formData.append('images', file);
-                        });
+                        const worker = new Worker('/js/image-worker.js');
 
-                        // Only send this request if the first was successful
-                        await authFetch(`/api/image/${id}`, {
-                            method: 'POST',
-                            body: formData
-                        });
+                        for (const image of images) {
+                            try {
+                                const converted = await new Promise(
+                                    (resolve, reject) => {
+                                        worker.onmessage = (e) =>
+                                            e.data.status === 'success'
+                                                ? resolve(e.data)
+                                                : reject(e.data.error);
+                                        worker.postMessage({
+                                            file: image,
+                                            quality: 0.8
+                                        });
+                                    }
+                                );
+
+                                const webpFile = new File(
+                                    [converted.blob],
+                                    image.name.replace(/\.[^/.]+$/, '') +
+                                        '.webp',
+                                    { type: 'image/webp' }
+                                );
+
+                                const formData = new FormData();
+                                formData.append('image', webpFile);
+
+                                await authFetch(`/api/image/${id}`, {
+                                    method: 'POST',
+                                    body: formData
+                                });
+                            } catch (error) {
+                                console.log(`Error ${image.name}: `, error);
+                            }
+                        }
+
+                        worker.terminate();
                     }
 
+                    fetchArtworks();
                     navigate(`/artwork/${id}`);
                 }
             } catch (error) {
@@ -127,28 +157,48 @@ export const ArtworkProvider = ({ children }) => {
                 setIsLoading((prev) => ({ ...prev, artwork: false }));
             }
         },
-        [authFetch, navigate]
+        [authFetch, navigate, fetchArtworks]
     );
 
     const uploadImages = useCallback(
         async (id, images) => {
             setIsLoading((prev) => ({ ...prev, upload: true }));
 
-            try {
-                const formData = new FormData();
-                images.forEach((file) => {
-                    formData.append('images', file);
-                });
+            const worker = new Worker('/js/image-worker.js');
 
-                await authFetch(`/api/image/${id}`, {
-                    method: 'POST',
-                    body: formData
-                });
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setIsLoading((prev) => ({ ...prev, upload: false }));
+            for (const image of images) {
+                try {
+                    const converted = await new Promise((resolve, reject) => {
+                        worker.onmessage = (e) =>
+                            e.data.status === 'success'
+                                ? resolve(e.data)
+                                : reject(e.data.error);
+                        worker.postMessage({
+                            file: image,
+                            quality: 0.8
+                        });
+                    });
+
+                    const webpFile = new File(
+                        [converted.blob],
+                        image.name.replace(/\.[^/.]+$/, '') + '.webp',
+                        { type: 'image/webp' }
+                    );
+
+                    const formData = new FormData();
+                    formData.append('image', webpFile);
+
+                    await authFetch(`/api/image/${id}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch (error) {
+                    console.log(`Error ${image.name}: `, error);
+                }
             }
+
+            worker.terminate();
+            setIsLoading((prev) => ({ ...prev, upload: false }));
         },
         [authFetch]
     );
@@ -165,13 +215,14 @@ export const ArtworkProvider = ({ children }) => {
                     },
                     body: JSON.stringify(artwork)
                 });
+                fetchArtworks();
             } catch (error) {
                 console.log(error);
             } finally {
                 setIsLoading((prev) => ({ ...prev, artwork: false }));
             }
         },
-        [authFetch]
+        [authFetch, fetchArtworks]
     );
 
     const updateLocation = useCallback(
@@ -207,19 +258,15 @@ export const ArtworkProvider = ({ children }) => {
                 });
 
                 if (response.ok) {
-                    setArtworks((prev) =>
-                        prev.filter((artwork) => artwork.id !== id)
-                    );
-
+                    fetchArtworks();
                     navigate('/artwork', { replace: true });
+                    setIsLoading((prev) => ({ ...prev, artwork: false }));
                 }
             } catch (error) {
                 console.log(error);
-            } finally {
-                setIsLoading((prev) => ({ ...prev, artwork: false }));
             }
         },
-        [authFetch, navigate]
+        [authFetch, navigate, fetchArtworks]
     );
 
     const deleteImages = useCallback(
@@ -257,7 +304,7 @@ export const ArtworkProvider = ({ children }) => {
                 });
 
                 if (!response.ok) {
-                    const errorMessage = await response.json();
+                    const errorMessage = await response.text();
                     throw new Error(errorMessage || response.status);
                 }
 

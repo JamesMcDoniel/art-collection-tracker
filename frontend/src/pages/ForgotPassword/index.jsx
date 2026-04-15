@@ -10,7 +10,7 @@ const ForgotPassword = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const response = await fetch('/api/auth/forgot-password', {
+        await fetch('/api/auth/forgot-password', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -18,9 +18,7 @@ const ForgotPassword = () => {
             body: JSON.stringify({ email })
         });
 
-        if (response.ok) {
-            setMessage('A reset link has been sent to your email');
-        }
+        setMessage('A reset link has been sent to your email');
     };
 
     return (

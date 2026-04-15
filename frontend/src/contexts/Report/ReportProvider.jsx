@@ -35,7 +35,7 @@ export const ReportProvider = ({ children }) => {
     }, [user, fetchReports]);
 
     const generateReport = useCallback(
-        async (obj) => {
+        async (records) => {
             setIsLoading(true);
             try {
                 await authFetch('/api/report', {
@@ -43,7 +43,7 @@ export const ReportProvider = ({ children }) => {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(obj)
+                    body: JSON.stringify(records)
                 });
 
                 await fetchReports();
@@ -59,23 +59,23 @@ export const ReportProvider = ({ children }) => {
     const uploadReports = useCallback(
         async (files) => {
             setIsLoading(true);
-            try {
+
+            for (const file of files) {
                 const formData = new FormData();
-                files.forEach((file) => {
-                    formData.append('reports', file);
-                });
+                formData.append('reports', file);
 
-                await authFetch('/api/report/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                fetchReports();
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setIsLoading(false);
+                try {
+                    await authFetch('/api/report/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
             }
+
+            fetchReports();
+            setIsLoading(false);
         },
         [authFetch, fetchReports]
     );

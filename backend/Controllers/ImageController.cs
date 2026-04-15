@@ -1,31 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
-using backend.Data;
 using backend.Filters;
 using Microsoft.AspNetCore.Authorization;
 
-namespace backend.Contollers
+namespace backend.Controllers
 {
     [ApiController]
     [Route("api/image")]
     public class ImageController : ControllerBase
     {
-        private readonly AppDbContext _context;
         private readonly IImageService _imageService;
 
-        public ImageController(AppDbContext context, IImageService imageService)
+        public ImageController(IImageService imageService)
         {
-            _context = context;
             _imageService = imageService;
         }
 
         [Authorize(Roles = "Curator")]
         [ValidateCSRFToken]
         [HttpPost("{id}")]
-        public async Task<IActionResult> UploadImages(int id, [FromForm] List<IFormFile> images)
+        public async Task<IActionResult> UploadImage(int id, [FromForm] IFormFile image)
         {
             try
             {
-                await _imageService.UploadArtworkImages(id, images);
+                await _imageService.UploadArtworkImage(id, image);
                 return Ok();
             }
             catch (Exception exception)
@@ -41,12 +38,27 @@ namespace backend.Contollers
         {
             try
             {
-                await _imageService.UploadSpreadsheetImages(image);
+                await _imageService.UploadSpreadsheetImage(image);
                 return Ok();
             }
             catch (Exception exception)
             {
                 return BadRequest(exception.Message);
+            }
+        }
+
+        [Authorize(Roles = "Curator")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetImagesByArtworkId(int id)
+        {
+            try
+            {
+                var response = await _imageService.GetImagesByArtworkId(id);
+                return Ok(response);
+            }
+            catch (Exception exception)
+            {
+                return NotFound(exception.Message);
             }
         }
 

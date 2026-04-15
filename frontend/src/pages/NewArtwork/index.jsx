@@ -71,7 +71,7 @@ const NewArtwork = () => {
 
     return (
         <section className={styles.container}>
-            {!isLoading.filter && !isLoading.artwork ? (
+            {!isLoading.filter && !isLoading.artwork && !isLoading.artworks ? (
                 <>
                     <div className={styles.button_row}>
                         <div>

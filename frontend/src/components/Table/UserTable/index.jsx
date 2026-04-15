@@ -46,6 +46,9 @@ const EditableRow = ({ data }) => {
     const { editUser, toggleDisabled, deleteUser } = useUserContext();
     const { user } = useAuthContext();
 
+    const isDefaultAdmin =
+        user.email === 'default_admin' && data.email === user.email;
+
     const handleStartEdit = () => {
         setChanges(data);
         setIsEditing(true);
@@ -122,7 +125,7 @@ const EditableRow = ({ data }) => {
                 )}
             </td>
             <td>
-                {isEditing && user.email !== 'default_admin' ? (
+                {isEditing && !isDefaultAdmin ? (
                     <Listbox
                         value={changes.role}
                         onChange={(value) =>
@@ -184,11 +187,13 @@ const EditableRow = ({ data }) => {
                 )}
             </td>
             <td>
-                <button onClick={() => toggleDisabled(data.id)}>
-                    <FontAwesomeIcon
-                        icon={data.disabled ? faSquareCheck : faSquare}
-                    />
-                </button>
+                {!isDefaultAdmin ? (
+                    <button onClick={() => toggleDisabled(data.id)}>
+                        <FontAwesomeIcon
+                            icon={data.disabled ? faSquareCheck : faSquare}
+                        />
+                    </button>
+                ) : null}
             </td>
             <td>
                 {!isEditing ? (
@@ -219,12 +224,14 @@ const EditableRow = ({ data }) => {
                 )}
             </td>
             <td>
-                <button onClick={() => deleteUser(data.id)}>
-                    <FontAwesomeIcon
-                        className={styles.delete}
-                        icon={faCircleXmark}
-                    />
-                </button>
+                {!isDefaultAdmin ? (
+                    <button onClick={() => deleteUser(data.id)}>
+                        <FontAwesomeIcon
+                            className={styles.delete}
+                            icon={faCircleXmark}
+                        />
+                    </button>
+                ) : null}
             </td>
         </tr>
     );

@@ -64,6 +64,32 @@
     box-shadow: none;
 }
 
+.no_images {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+
+    height: 300px;
+    width: 100%;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    background-color: #fff;
+
+    cursor: default;
+}
+
+.no_images > span {
+    font-size: 2rem;
+    font-weight: 400;
+}
+
+.no_images > svg {
+    font-size: 4.5rem;
+}
+
 .image {
     height: 300px;
     width: 100%;

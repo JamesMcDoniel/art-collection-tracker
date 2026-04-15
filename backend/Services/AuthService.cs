@@ -112,42 +112,78 @@ public class AuthService : IAuthService
 
         var user = await _context.User.FirstOrDefaultAsync(user => user.Email == email);
 
-        if (user == null)
+        // For security reasons, I don't want to reveal whether an email was legit
+        // or not.
+        if (user != null)
         {
-            throw new Exception("Error requesting reset");
+            // Invalidate any existing active tokens
+            var existingTokens = await _context.PasswordReset
+                .Where(passwordReset => passwordReset.UserId == user.Id &&
+                    !passwordReset.IsUsed &&
+                    passwordReset.ExpiresAt > DateTime.UtcNow)
+                .ToListAsync();
+
+            foreach (var token in existingTokens)
+            {
+                token.IsUsed = true;
+            }
+
+            // Generate a random string to use as token
+            var newToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+            // Save token to database
+            var passwordReset = new PasswordReset
+            {
+                Token = newToken,
+                UserId = user.Id,
+                ExpiresAt = DateTime.UtcNow.AddHours(1),
+                IsUsed = false
+            };
+
+            _context.PasswordReset.Add(passwordReset);
+            await _context.SaveChangesAsync();
+
+            var resetLink = $"{_clientURL}/reset-password?token={WebUtility.UrlEncode(newToken)}&email={user.Email}";
+            var body = $$"""
+            <html>
+                <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #0e4c89;">Password Reset Request</h2>
+                        <p>Hello {{user.FirstName}} {{user.LastName}},</p>
+                        <p>
+                            We received a request to reset the password for your account associated with:
+                        </p>
+                        <p>
+                            <strong>{{user.Email}}</strong>
+                        </p>
+                        <p>
+                            Click the button below to choose a new password:
+                        </p>
+                        <p>
+                            <a href="{{resetLink}}" style="display: inline-block; padding: 10px 15px; background-color: #489d46; color: #ffffff; text-decoration: none; border-radius: 4px;">
+                                Reset Your Password
+                            </a>
+                        </p>
+                        <p style="margin-top: 20px;">
+                            If the button above does not work, copy and paste this link into your browser:
+                        </p>
+                        <p style="word-break: break-all;">
+                            {{resetLink}}
+                        </p>
+                        <p style="margin-top: 20px;">
+                            If you did not request a password reset, you can safely ignore this email.
+                        </p>
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+                        <p style="font-size: 12px; color: #777;">
+                            For security reasons, this link will expire in 1 hour.
+                        </p>
+                    </div>
+                </body>
+            </html>
+            """;
+
+            await _emailService.SendEmail(user.Email, "Artwork Tracker - Reset Password", body);
         }
-
-        // Invalidate any existing active tokens
-        var existingTokens = await _context.PasswordReset
-            .Where(passwordReset => passwordReset.UserId == user.Id &&
-                !passwordReset.IsUsed &&
-                passwordReset.ExpiresAt > DateTime.UtcNow)
-            .ToListAsync();
-
-        foreach (var token in existingTokens)
-        {
-            token.IsUsed = true;
-        }
-
-        // Generate a random string to use as token
-        var newToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-
-        // Save token to database
-        var passwordReset = new PasswordReset
-        {
-            Token = newToken,
-            UserId = user.Id,
-            ExpiresAt = DateTime.UtcNow.AddHours(1),
-            IsUsed = false
-        };
-
-        _context.PasswordReset.Add(passwordReset);
-        await _context.SaveChangesAsync();
-
-        // Send email to User
-        var resetLink = $"{_clientURL}/reset-password?token={WebUtility.UrlEncode(newToken)}&email={user.Email}";
-        await _emailService.SendEmail(user.Email, "Artwork Tracker - Reset Password",
-            $"<p>Click <a href='{resetLink}'>here</a> to reset your password.</p><p>or, Copy and Paste:</p><p>{resetLink}</p>");
     }
 
     public async Task ResetPassword(string email, string token, string newPassword)
@@ -214,8 +250,45 @@ public class AuthService : IAuthService
         _context.User.Add(user);
         await _context.SaveChangesAsync();
 
-        await _emailService.SendEmail(dto.Email, "Artwork Tracker - Account Created",
-            $"<h2>Account Created</h2><p>Login: {dto.Email}</p><p>Click <a href='{_clientURL}/forgot-password'>here</a> to set your password.</p><p>or, copy and paste the link directly:</p><p>{_clientURL}/forgot-password</p>");
+        var body = $$"""
+        <html>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; color: #333;">
+                <div style="max-width: 600px; margin:0 auto; padding:20px;">
+                    <h2 style="color: #0e4c89;">Welcome to the ASUMH Artwork Tracker</h2>
+                    <p>Hello {{dto.FirstName}} {{dto.LastName}},</p>
+                    <p>
+                        An account has been created for you in the 
+                        <a href="{{_clientURL}}" style="color: #1a73e8;">ASUMH Artwork Tracker</a>.
+                    </p>
+                    <p>
+                        You can sign in using your email:
+                        <br/>
+                        <strong>{{dto.Email}}</strong>
+                    </p>
+                    <p>
+                        To get started, you'll need to set your password. Click the link below and follow the instructions:
+                    </p>
+                    <p>
+                        <a href="{{_clientURL}}/forgot-password" style="display: inline-block; padding: 10px 15px; background-color: #489d46; color: #ffffff; text-decoration: none; border-radius: 4px;">
+                            Set Your Password
+                        </a>
+                    </p>
+                    <p style="margin-top: 20px;">
+                        If the button above doesn't work, you can copy and paste this link into your browser:
+                    </p>
+                    <p style="word-break: break-all;">
+                        {{_clientURL}}/forgot-password
+                    </p>
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+                    <p style="font-size: 12px; color: #777;">
+                        If you weren’t expecting this email, you can safely ignore it.
+                    </p>
+                </div>
+            </body>
+        </html>
+        """;
+
+        await _emailService.SendEmail(dto.Email, "Artwork Tracker - Account Created", body);
     }
 
     public async Task<List<UserDto>> GetAllUsers()

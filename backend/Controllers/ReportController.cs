@@ -1,4 +1,5 @@
 using backend.Filters;
+using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,6 +53,7 @@ namespace backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Curator")]
         [HttpGet]
         public async Task<IActionResult> GetAllReports()
         {
