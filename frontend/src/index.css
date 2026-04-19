@@ -52,10 +52,6 @@ img {
     height: auto;
 }
 
-/* main > *:not(aside) {
-    flex: 1;
-} */
-
 nav > ul > li > a.active {
     text-decoration: underline;
     text-underline-offset: 0.35em;

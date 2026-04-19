@@ -77,21 +77,5 @@ namespace backend.Controllers
                 return BadRequest(exception.Message);
             }
         }
-
-        private float CosignSimilarity(float[] a, float[] b)
-        {
-            float dot = 0f;
-            float normA = 0f;
-            float normB = 0f;
-
-            for (int i = 0; i < a.Length; i++)
-            {
-                dot += a[i] * b[i];
-                normA += a[i] * a[i];
-                normB += b[i] * b[i];
-            }
-
-            return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
-        }
     }
 }

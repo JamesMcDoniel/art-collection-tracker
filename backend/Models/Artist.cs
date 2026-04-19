@@ -4,6 +4,7 @@ namespace backend.Models
     {
         public int Id { get; set; } // PK
         public string Name { get; set; } = string.Empty;
+        public string Slug { get; set; } = string.Empty;
 
         // Relationship
         public ICollection<Artwork> Artworks { get; set; } = new List<Artwork>();

@@ -87,47 +87,74 @@ export const useFileUpload = ({ mime, ext }) => {
         });
         setIsUploading(true);
 
-        const worker = new Worker('/js/image-worker.js');
+        // const CONCURRENCY_LIMIT = Math.min(
+        //     files.length,
+        //     navigator.hardwareConcurrency || 4
+        // );
 
-        for (const file of files) {
-            try {
-                setProgress((prev) => ({ ...prev, file: file.name }));
+        // Unleashing 8 cores on the Azure Free Tier will likely
+        // make it explode.
+        const CONCURRENCY_LIMIT = Math.min(files.length, 2);
 
-                const converted = await new Promise((resolve, reject) => {
-                    worker.onmessage = (e) =>
-                        e.data.status === 'success'
-                            ? resolve(e.data)
-                            : reject(e.data.error);
-                    worker.postMessage({ file, quality: 0.8 });
-                });
+        const queue = [...files];
+        let completedCount = 0;
 
-                const webpFile = new File(
-                    [converted.blob],
-                    file.name.replace(/\.[^/.]+$/, '') + '.webp',
-                    { type: 'image/webp' }
-                );
+        const runner = async () => {
+            while (queue.length > 0) {
+                const file = queue.shift();
+                if (!file) continue;
 
-                const formData = new FormData();
-                formData.append('image', webpFile);
+                const worker = new Worker('/js/image-worker.js');
 
-                await authFetch('/api/image/spreadsheet', {
-                    method: 'POST',
-                    body: formData
-                });
+                try {
+                    setProgress((prev) => ({ ...prev, file: file.name }));
 
-                setProgress((prev) => ({
-                    ...prev,
-                    percent: Math.round(
-                        ((prev.completed + 1) / files.length) * 100
-                    ),
-                    completed: prev.completed + 1
-                }));
-            } catch (error) {
-                console.log(`Error ${file.name}: `, error);
+                    const converted = await new Promise((resolve, reject) => {
+                        worker.onmessage = (e) =>
+                            e.data.status === 'success'
+                                ? resolve(e.data)
+                                : reject(e.data.error);
+                        worker.onerror = reject;
+                        worker.postMessage({ file, quality: 0.8 });
+                    });
+
+                    const webpFile = new File(
+                        [converted.blob],
+                        file.name.replace(/\.[^/.]+$/, '') + '.webp',
+                        { type: 'image/webp' }
+                    );
+
+                    const formData = new FormData();
+                    formData.append('image', webpFile);
+
+                    await authFetch('/api/image/spreadsheet', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    completedCount++;
+                    setProgress((prev) => ({
+                        ...prev,
+                        percent: Math.round(
+                            (completedCount / files.length) * 100
+                        ),
+                        completed: completedCount
+                    }));
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    worker.terminate();
+                }
             }
+        };
+
+        const lanes = [];
+        for (let i = 0; i < CONCURRENCY_LIMIT; i++) {
+            lanes.push(runner());
         }
 
-        worker.terminate();
+        await Promise.all(lanes);
+
         setIsUploading(false);
         setFiles([]);
     }, [files, authFetch]);

@@ -1,5 +1,4 @@
 using backend.Filters;
-using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

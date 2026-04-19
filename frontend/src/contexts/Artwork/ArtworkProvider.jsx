@@ -109,43 +109,69 @@ export const ArtworkProvider = ({ children }) => {
                     const id = await artworkResponse.json();
 
                     if (images.length > 0) {
-                        const worker = new Worker('/js/image-worker.js');
+                        // const CONCURRENCY_LIMIT = Math.min(
+                        //     files.length,
+                        //     navigator.hardwareConcurrency || 4
+                        // );
 
-                        for (const image of images) {
-                            try {
-                                const converted = await new Promise(
-                                    (resolve, reject) => {
-                                        worker.onmessage = (e) =>
-                                            e.data.status === 'success'
-                                                ? resolve(e.data)
-                                                : reject(e.data.error);
-                                        worker.postMessage({
-                                            file: image,
-                                            quality: 0.8
-                                        });
-                                    }
+                        // Unleashing 8 cores on the Azure Free Tier will likely
+                        // make it explode.
+                        const CONCURRENCY_LIMIT = Math.min(images.length, 2);
+
+                        const queue = [...images];
+
+                        const runner = async () => {
+                            while (queue.length > 0) {
+                                const file = queue.shift();
+                                if (!file) continue;
+
+                                const worker = new Worker(
+                                    '/js/image-worker.js'
                                 );
 
-                                const webpFile = new File(
-                                    [converted.blob],
-                                    image.name.replace(/\.[^/.]+$/, '') +
-                                        '.webp',
-                                    { type: 'image/webp' }
-                                );
+                                try {
+                                    const converted = await new Promise(
+                                        (resolve, reject) => {
+                                            worker.onmessage = (e) =>
+                                                e.data.status === 'success'
+                                                    ? resolve(e.data)
+                                                    : reject(e.data.error);
+                                            worker.onerror = reject;
+                                            worker.postMessage({
+                                                file,
+                                                quality: 0.8
+                                            });
+                                        }
+                                    );
 
-                                const formData = new FormData();
-                                formData.append('image', webpFile);
+                                    const webpFile = new File(
+                                        [converted.blob],
+                                        file.name.replace(/\.[^/.]+$/, '') +
+                                            '.webp',
+                                        { type: 'image/webp' }
+                                    );
 
-                                await authFetch(`/api/image/${id}`, {
-                                    method: 'POST',
-                                    body: formData
-                                });
-                            } catch (error) {
-                                console.log(`Error ${image.name}: `, error);
+                                    const formData = new FormData();
+                                    formData.append('image', webpFile);
+
+                                    await authFetch(`/api/image/${id}`, {
+                                        method: 'POST',
+                                        body: formData
+                                    });
+                                } catch (error) {
+                                    console.log(error);
+                                } finally {
+                                    worker.terminate();
+                                }
                             }
+                        };
+
+                        const lanes = [];
+                        for (let i = 0; i < CONCURRENCY_LIMIT; i++) {
+                            lanes.push(runner());
                         }
 
-                        worker.terminate();
+                        await Promise.all(lanes);
                     }
 
                     fetchArtworks();
@@ -164,40 +190,67 @@ export const ArtworkProvider = ({ children }) => {
         async (id, images) => {
             setIsLoading((prev) => ({ ...prev, upload: true }));
 
-            const worker = new Worker('/js/image-worker.js');
+            // const CONCURRENCY_LIMIT = Math.min(
+            //     files.length,
+            //     navigator.hardwareConcurrency || 4
+            // );
 
-            for (const image of images) {
-                try {
-                    const converted = await new Promise((resolve, reject) => {
-                        worker.onmessage = (e) =>
-                            e.data.status === 'success'
-                                ? resolve(e.data)
-                                : reject(e.data.error);
-                        worker.postMessage({
-                            file: image,
-                            quality: 0.8
+            // Unleashing 8 cores on the Azure Free Tier will likely
+            // make it explode.
+            const CONCURRENCY_LIMIT = Math.min(images.length, 2);
+
+            const queue = [...images];
+
+            const runner = async () => {
+                while (queue.length > 0) {
+                    const file = queue.shift();
+                    if (!file) continue;
+
+                    const worker = new Worker('/js/image-worker.js');
+
+                    try {
+                        const converted = await new Promise(
+                            (resolve, reject) => {
+                                worker.onmessage = (e) =>
+                                    e.data.status === 'success'
+                                        ? resolve(e.data)
+                                        : reject(e.data.error);
+                                worker.onerror = reject;
+                                worker.postMessage({
+                                    file,
+                                    quality: 0.8
+                                });
+                            }
+                        );
+
+                        const webpFile = new File(
+                            [converted.blob],
+                            file.name.replace(/\.[^/.]+$/, '') + '.webp',
+                            { type: 'image/webp' }
+                        );
+
+                        const formData = new FormData();
+                        formData.append('image', webpFile);
+
+                        await authFetch(`/api/image/${id}`, {
+                            method: 'POST',
+                            body: formData
                         });
-                    });
-
-                    const webpFile = new File(
-                        [converted.blob],
-                        image.name.replace(/\.[^/.]+$/, '') + '.webp',
-                        { type: 'image/webp' }
-                    );
-
-                    const formData = new FormData();
-                    formData.append('image', webpFile);
-
-                    await authFetch(`/api/image/${id}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                } catch (error) {
-                    console.log(`Error ${image.name}: `, error);
+                    } catch (error) {
+                        console.log(error);
+                    } finally {
+                        worker.terminate();
+                    }
                 }
+            };
+
+            const lanes = [];
+            for (let i = 0; i < CONCURRENCY_LIMIT; i++) {
+                lanes.push(runner());
             }
 
-            worker.terminate();
+            await Promise.all(lanes);
+
             setIsLoading((prev) => ({ ...prev, upload: false }));
         },
         [authFetch]

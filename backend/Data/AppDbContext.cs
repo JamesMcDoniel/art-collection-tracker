@@ -47,16 +47,44 @@ namespace backend.Data
                 .HasIndex(artwork => artwork.Asset_Num)
                 .IsUnique();
 
+            modelBuilder.Entity<Artwork>()
+                .HasIndex(artwork => artwork.Title)
+                .IsUnique();
+
+            modelBuilder.Entity<Artwork>()
+                .HasIndex(artwork => artwork.Slug)
+                .IsUnique();
+
             modelBuilder.Entity<Collection>()
                 .HasIndex(collection => collection.Title)
+                .IsUnique();
+
+            modelBuilder.Entity<Collection>()
+                .HasIndex(collection => collection.Slug)
                 .IsUnique();
 
             modelBuilder.Entity<Category>()
                 .HasIndex(category => category.Title)
                 .IsUnique();
 
+            modelBuilder.Entity<Category>()
+                .HasIndex(category => category.Slug)
+                .IsUnique();
+
+            modelBuilder.Entity<Artist>()
+                .HasIndex(artist => artist.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<Artist>()
+                .HasIndex(artist => artist.Slug)
+                .IsUnique();
+
             modelBuilder.Entity<Medium>()
                 .HasIndex(medium => medium.Type)
+                .IsUnique();
+
+            modelBuilder.Entity<Medium>()
+                .HasIndex(medium => medium.Slug)
                 .IsUnique();
 
             modelBuilder.Entity<Location>()
@@ -67,14 +95,9 @@ namespace backend.Data
                 .HasIndex(loanStatus => loanStatus.Status)
                 .IsUnique();
 
-            // I'll still add Artist & Donor here for Indexes to speed up lookup,
-            // but they won't be Unique, since names aren't necessarily always
-            // unique.
-            modelBuilder.Entity<Artist>()
-                .HasIndex(artist => artist.Name);
-
             modelBuilder.Entity<Donor>()
-                .HasIndex(donor => donor.Name);
+                .HasIndex(donor => donor.Name)
+                .IsUnique();
 
             // All Users must have a Role. Restrict prevents a parent record
             // from being deleted while there are still dependent child records

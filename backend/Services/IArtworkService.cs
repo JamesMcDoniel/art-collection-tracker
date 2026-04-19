@@ -9,6 +9,7 @@ public interface IArtworkService
     Task UpdateLocation(int id, string? location);
     Task DeleteArtwork(int id);
     Task<FilterDto> GetAllFilters();
+    string GenerateSlug(string input);
 
     // I'm not sure how to make these a more generic and
     // universal method instead of each being separate

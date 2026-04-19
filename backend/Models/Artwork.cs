@@ -5,6 +5,7 @@ namespace backend.Models
         public int Id { get; set; } // PK
         public string? Asset_Num { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string Slug { get; set; } = string.Empty;
         public string? Dimensions { get; set; }
         public string? Description { get; set; }
         public double? Retail_Low_Estimate { get; set; }

@@ -1,6 +1,8 @@
 using backend.Data;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Text.RegularExpressions;
 
 public class ArtworkService : IArtworkService
 {
@@ -93,6 +95,7 @@ public class ArtworkService : IArtworkService
         {
             Asset_Num = dto.Asset_Num,
             Title = dto.Title,
+            Slug = GenerateSlug(dto.Title),
             Description = dto.Description,
             Dimensions = dto.Dimensions,
             Retail_Low_Estimate = dto.Retail_Low_Estimate,
@@ -128,6 +131,7 @@ public class ArtworkService : IArtworkService
         // DTO.
         artwork.Asset_Num = dto.Asset_Num;
         artwork.Title = dto.Title;
+        artwork.Slug = GenerateSlug(dto.Title);
         artwork.Description = dto.Description;
         artwork.Dimensions = dto.Dimensions;
         artwork.Retail_Low_Estimate = dto.Retail_Low_Estimate;
@@ -231,6 +235,40 @@ public class ArtworkService : IArtworkService
         };
     }
 
+    public string GenerateSlug(string input)
+    {
+        var str = input.ToLowerInvariant();
+
+        // Remove accents
+        str = RemoveDiacritics(str);
+
+        // Remove invalid characters
+        str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
+
+        // Convert multiple spaces into one
+        str = Regex.Replace(str, @"\s+", " ").Trim();
+
+        // Replace spaces with hyphens
+        str = str.Replace(" ", "-");
+
+        return str;
+    }
+
+    private string RemoveDiacritics(string text)
+    {
+        var normalized = text.Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder();
+
+        foreach (var c in normalized)
+        {
+            var unicodeCategory = Char.GetUnicodeCategory(c);
+            if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                builder.Append(c);
+        }
+
+        return builder.ToString().Normalize(NormalizationForm.FormC);
+    }
+
     // These methods all work the same way: If given null, they just return
     // null to be added to the database, otherwise, if the item exists, return
     // the item's id. However, if the item doesn't already exist, add it to the
@@ -253,7 +291,8 @@ public class ArtworkService : IArtworkService
 
         var newCollection = new Collection
         {
-            Title = title
+            Title = title,
+            Slug = GenerateSlug(title)
         };
         _context.Collection.Add(newCollection);
 
@@ -276,7 +315,8 @@ public class ArtworkService : IArtworkService
 
         var newCategory = new Category
         {
-            Title = title
+            Title = title,
+            Slug = GenerateSlug(title)
         };
         _context.Category.Add(newCategory);
 
@@ -299,7 +339,8 @@ public class ArtworkService : IArtworkService
 
         var newArtist = new Artist
         {
-            Name = name
+            Name = name,
+            Slug = GenerateSlug(name)
         };
         _context.Artist.Add(newArtist);
 
@@ -322,7 +363,8 @@ public class ArtworkService : IArtworkService
 
         var newMedium = new Medium
         {
-            Type = type
+            Type = type,
+            Slug = GenerateSlug(type)
         };
         _context.Medium.Add(newMedium);
 

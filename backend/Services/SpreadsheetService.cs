@@ -115,6 +115,7 @@ public class SpreadsheetService : ISpreadsheetService
             {
                 Asset_Num = ValidateString(row, columnMap, "assetnum"),
                 Title = ValidateRequiredString(row, columnMap, "title"),
+                Slug = _artworkService.GenerateSlug(ValidateRequiredString(row, columnMap, "title")),
                 Dimensions = ValidateString(row, columnMap, "dimensions"),
                 Description = ValidateString(row, columnMap, "briefdescription"),
                 Retail_Low_Estimate = ValidateDouble(row, columnMap, "retaillowestimate"),

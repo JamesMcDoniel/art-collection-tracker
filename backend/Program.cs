@@ -6,7 +6,7 @@ using backend.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Create CORS policy to connect with React frontend (http://localhost:5173)
+var publicFrontend = builder.Configuration["AppSettings:PublicFrontendURL"];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("dev", policy =>
@@ -15,6 +15,16 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
+    });
+
+    options.AddPolicy("PublicGallery", policy =>
+    {
+        if (!string.IsNullOrEmpty(publicFrontend))
+        {
+            policy.WithOrigins(publicFrontend)
+                .WithMethods("GET")
+                .AllowAnyHeader();
+        }
     });
 });
 
@@ -71,6 +81,7 @@ builder.Services.AddScoped<IArtworkService, ArtworkService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ISpreadsheetService, SpreadsheetService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IPublicService, PublicService>();
 
 builder.Services.AddHostedService<TokenCleanupService>();
 
@@ -87,7 +98,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Enable CORS policy
-app.UseCors("dev");
+app.UseCors();
 
 // Enable Authentication and Authorization middleware
 app.UseAuthentication();

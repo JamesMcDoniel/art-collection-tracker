@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -10,9 +11,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260415082545_AddSlugs")]
+    partial class AddSlugs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -33,11 +36,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.ToTable("Artist");
                 });
@@ -111,12 +110,6 @@ namespace backend.Migrations
 
                     b.HasIndex("Medium_Id");
 
-                    b.HasIndex("Slug")
-                        .IsUnique();
-
-                    b.HasIndex("Title")
-                        .IsUnique();
-
                     b.ToTable("Artwork");
                 });
 
@@ -135,9 +128,6 @@ namespace backend.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
 
                     b.HasIndex("Title")
                         .IsUnique();
@@ -161,9 +151,6 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Slug")
-                        .IsUnique();
-
                     b.HasIndex("Title")
                         .IsUnique();
 
@@ -182,8 +169,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.ToTable("Donor");
                 });
@@ -264,9 +250,6 @@ namespace backend.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
 
                     b.HasIndex("Type")
                         .IsUnique();
