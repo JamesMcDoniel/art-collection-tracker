@@ -69,4 +69,8 @@
 .input:disabled {
     border-color: #1266b8;
     background-color: #1266b822;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
