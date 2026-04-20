@@ -1,5 +1,6 @@
 using backend.Data;
 using backend.Models;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -146,7 +147,31 @@ public class ArtworkService : IArtworkService
         artwork.Loan_Status = await GetOrCreateLoanStatus(dto.Loan_Status);
         artwork.Donor = await GetOrCreateDonor(dto.Donor);
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException exception)
+        {
+            if (exception.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+            {
+
+                var message = sqliteEx.Message;
+
+                if (message.Contains("Artwork.Title"))
+                {
+                    throw new Exception("Title must be unique");
+                }
+
+                if (message.Contains("Artwork.Asset_Num"))
+                {
+                    throw new Exception("Asset_Num must be unique");
+                }
+
+            }
+
+            throw;
+        }
     }
 
     public async Task UpdateLocation(int id, string? location)

@@ -261,16 +261,31 @@ export const ArtworkProvider = ({ children }) => {
             setIsLoading((prev) => ({ ...prev, artwork: true }));
 
             try {
-                await authFetch(`/api/artwork/${id}`, {
+                const response = await authFetch(`/api/artwork/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(artwork)
                 });
+
+                if (!response.ok) {
+                    let errorMessage = 'Something went wrong';
+
+                    try {
+                        const errorResponse = await response.text();
+                        errorMessage = errorResponse || errorMessage;
+                    } catch (error) {
+                        console.log(error);
+                    }
+
+                    throw new Error(errorMessage);
+                }
+
                 fetchArtworks();
             } catch (error) {
-                console.log(error);
+                // Re-throw
+                throw new Error(error.message);
             } finally {
                 setIsLoading((prev) => ({ ...prev, artwork: false }));
             }

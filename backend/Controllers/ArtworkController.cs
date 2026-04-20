@@ -75,7 +75,7 @@ namespace backend.Controllers
             }
             catch (Exception exception)
             {
-                return BadRequest(exception.Message);
+                return NotFound(exception.Message);
             }
         }
 
@@ -91,7 +91,7 @@ namespace backend.Controllers
             }
             catch (Exception exception)
             {
-                return NotFound(exception.Message);
+                return BadRequest(exception.Message);
             }
         }
 

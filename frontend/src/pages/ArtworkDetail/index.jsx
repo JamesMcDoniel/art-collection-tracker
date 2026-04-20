@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo, useReducer } from 'react';
+import { useState, useEffect, useCallback, useMemo, useReducer } from 'react';
 import { useParams } from 'react-router';
 import { useArtworkContext } from '../../hooks/useArtworkContext';
 import { useAuthContext } from '../../hooks/useAuthContext';
@@ -32,6 +32,7 @@ const artworkReducer = (state, action) => {
 };
 
 const ArtworkDetail = () => {
+    const [errorMessage, setErrorMessage] = useState(null);
     const [state, dispatch] = useReducer(artworkReducer, {
         initial: null,
         current: null
@@ -117,6 +118,8 @@ const ArtworkDetail = () => {
         e.preventDefault();
 
         if (user.role === 'Curator') {
+            setErrorMessage(null);
+
             // If there are Images to be deleted, delete them.
             if (deletedImages.length > 0) {
                 await deleteImages(deletedImages);
@@ -134,8 +137,12 @@ const ArtworkDetail = () => {
 
             // Update Artwork Table
             if (hasChanges) {
-                await updateArtwork(id, state.current);
-                dispatch({ type: 'SET_INITIAL', payload: state.current });
+                try {
+                    await updateArtwork(id, state.current);
+                    dispatch({ type: 'SET_INITIAL', payload: state.current });
+                } catch (error) {
+                    setErrorMessage(error.message);
+                }
             }
         } else if (user.role === 'Facilities') {
             await updateLocation(id, state.current.location);
@@ -149,6 +156,7 @@ const ArtworkDetail = () => {
             await fetchImagesByArtworkId(id);
         }
 
+        setErrorMessage(null);
         dispatch({ type: 'RESET' });
     };
 
@@ -196,6 +204,12 @@ const ArtworkDetail = () => {
                         ) : null}
                         <form
                             id="artwork-form"
+                            className={
+                                errorMessage &&
+                                (errorMessage.includes('Asset_Num')
+                                    ? styles.error_an
+                                    : styles.error_t)
+                            }
                             onSubmit={
                                 user.role === 'Curator' ||
                                 user.role === 'Facilities'
@@ -225,6 +239,12 @@ const ArtworkDetail = () => {
                                         }
                                         disabled={user.role !== 'Curator'}
                                     />
+                                    {errorMessage &&
+                                    errorMessage.includes('Asset_Num') ? (
+                                        <span className={styles.error_message}>
+                                            {errorMessage}
+                                        </span>
+                                    ) : null}
                                     <TextInput
                                         label="Title"
                                         field="title"
@@ -238,6 +258,12 @@ const ArtworkDetail = () => {
                                         disabled={user.role !== 'Curator'}
                                         required
                                     />
+                                    {errorMessage &&
+                                    errorMessage.includes('Title') ? (
+                                        <span className={styles.error_message}>
+                                            {errorMessage}
+                                        </span>
+                                    ) : null}
                                     <TextInput
                                         label="Dimensions"
                                         field="dimensions"
