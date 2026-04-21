@@ -128,6 +128,22 @@ public class ArtworkService : IArtworkService
             throw new Exception("Artwork not found");
         }
 
+        var titleExists = await _context.Artwork
+            .AnyAsync(artwork => artwork.Title == dto.Title && artwork.Id != id);
+
+        if (titleExists)
+        {
+            throw new Exception("Title must be unique");
+        }
+
+        var assetExists = await _context.Artwork
+            .AnyAsync(artwork => artwork.Asset_Num == dto.Asset_Num && artwork.Id != id);
+
+        if (assetExists)
+        {
+            throw new Exception("Asset_Num must be unique");
+        }
+
         // Update all of the fields on the found Artwork with those from the
         // DTO.
         artwork.Asset_Num = dto.Asset_Num;
@@ -147,31 +163,7 @@ public class ArtworkService : IArtworkService
         artwork.Loan_Status = await GetOrCreateLoanStatus(dto.Loan_Status);
         artwork.Donor = await GetOrCreateDonor(dto.Donor);
 
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException exception)
-        {
-            if (exception.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
-            {
-
-                var message = sqliteEx.Message;
-
-                if (message.Contains("Artwork.Title"))
-                {
-                    throw new Exception("Title must be unique");
-                }
-
-                if (message.Contains("Artwork.Asset_Num"))
-                {
-                    throw new Exception("Asset_Num must be unique");
-                }
-
-            }
-
-            throw;
-        }
+        await _context.SaveChangesAsync();
     }
 
     public async Task UpdateLocation(int id, string? location)

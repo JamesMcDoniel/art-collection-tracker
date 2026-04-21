@@ -100,6 +100,16 @@ const ArtworkDetail = () => {
         [state]
     );
 
+    useEffect(() => {
+        const clearError = () => {
+            if (!hasChanges) {
+                setErrorMessage(null);
+            }
+        };
+
+        clearError();
+    }, [hasChanges]);
+
     const handleChange = useCallback((value, field) => {
         const isNumeric =
             field === 'retail_Low_Estimate' || field === 'retail_High_Estimate';
