@@ -28,7 +28,7 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(user => user.Email == dto.Email);
 
         // User doesn't exist or provided password didn't match stored password hash
-        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+        if (user == null || user.PasswordHash == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
         {
             throw new Exception("Invalid email or password");
         }

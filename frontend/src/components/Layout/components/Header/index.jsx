@@ -66,6 +66,7 @@ const Header = () => {
                                 <NavLink
                                     to="/artwork"
                                     onClick={closeMobileMenu}
+                                    end
                                 >
                                     Artwork
                                 </NavLink>
@@ -75,6 +76,7 @@ const Header = () => {
                                     <NavLink
                                         to="/reports"
                                         onClick={closeMobileMenu}
+                                        end
                                     >
                                         Reports
                                     </NavLink>
