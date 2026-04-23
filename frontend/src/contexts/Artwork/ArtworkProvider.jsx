@@ -111,7 +111,7 @@ export const ArtworkProvider = ({ children }) => {
                         const errorResponse = await artworkResponse.text();
                         errorMessage = errorResponse || errorMessage;
                     } catch (error) {
-                        console.log('nipple', error);
+                        console.log(error);
                     }
 
                     throw new Error(errorMessage);
