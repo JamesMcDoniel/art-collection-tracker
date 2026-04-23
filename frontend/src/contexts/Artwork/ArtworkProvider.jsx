@@ -104,6 +104,19 @@ export const ArtworkProvider = ({ children }) => {
                     body: JSON.stringify(artwork)
                 });
 
+                if (!artworkResponse.ok) {
+                    let errorMessage = 'Something went wrong';
+
+                    try {
+                        const errorResponse = await artworkResponse.text();
+                        errorMessage = errorResponse || errorMessage;
+                    } catch (error) {
+                        console.log('nipple', error);
+                    }
+
+                    throw new Error(errorMessage);
+                }
+
                 if (artworkResponse.ok) {
                     // ArtworkResponse returns its Artwork.Id
                     const id = await artworkResponse.json();
@@ -178,7 +191,7 @@ export const ArtworkProvider = ({ children }) => {
                     navigate(`/artwork/${id}`);
                 }
             } catch (error) {
-                console.log(error);
+                throw new Error(error.message);
             } finally {
                 setIsLoading((prev) => ({ ...prev, artwork: false }));
             }

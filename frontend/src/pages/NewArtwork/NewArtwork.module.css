@@ -118,3 +118,15 @@ button.delete {
         justify-content: normal;
     }
 }
+
+form.error_an > div > div:first-child > div:nth-child(2) input,
+form.error_t input[required] {
+    border-color: #d01010;
+    background-color: #d0101011;
+}
+
+.error_message {
+    font-weight: 400;
+    color: #d01010;
+    text-align: center;
+}

@@ -1,4 +1,4 @@
-import { useCallback, useReducer } from 'react';
+import { useState, useCallback, useReducer } from 'react';
 import { useArtworkContext } from '../../hooks/useArtworkContext';
 import { useAuthContext } from '../../hooks/useAuthContext';
 import { useCarousel } from '../../hooks/useCarousel';
@@ -24,6 +24,7 @@ const artworkReducer = (state, action) => {
 };
 
 const NewArtwork = () => {
+    const [errorMessage, setErrorMessage] = useState(null);
     const [state, dispatch] = useReducer(artworkReducer, {
         asset_Num: null,
         title: null,
@@ -66,7 +67,11 @@ const NewArtwork = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        await createArtwork(state, uploadedFiles);
+        try {
+            await createArtwork(state, uploadedFiles);
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
     };
 
     return (
@@ -86,6 +91,12 @@ const NewArtwork = () => {
                     </div>
                     <form
                         id="artwork-form"
+                        className={
+                            errorMessage &&
+                            (errorMessage.includes('Asset_Num')
+                                ? styles.error_an
+                                : styles.error_t)
+                        }
                         onSubmit={handleSubmit}
                     >
                         <div className={styles.flex_container}>
@@ -106,6 +117,12 @@ const NewArtwork = () => {
                                     onChange={handleChange}
                                     trackNew
                                 />
+                                {errorMessage &&
+                                errorMessage.includes('Asset_Num') ? (
+                                    <span className={styles.error_message}>
+                                        {errorMessage}
+                                    </span>
+                                ) : null}
                                 <TextInput
                                     label="Title"
                                     field="title"
@@ -115,6 +132,12 @@ const NewArtwork = () => {
                                     trackNew
                                     required
                                 />
+                                {errorMessage &&
+                                errorMessage.includes('Title') ? (
+                                    <span className={styles.error_message}>
+                                        {errorMessage}
+                                    </span>
+                                ) : null}
                                 <TextInput
                                     label="Dimensions"
                                     field="dimensions"

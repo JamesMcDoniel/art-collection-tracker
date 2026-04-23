@@ -92,6 +92,22 @@ public class ArtworkService : IArtworkService
 
     public async Task<int> CreateArtwork(ArtworkDto dto)
     {
+        var titleExists = await _context.Artwork
+            .AnyAsync(artwork => artwork.Title == dto.Title);
+
+        if (titleExists)
+        {
+            throw new Exception("Title must be unique");
+        }
+
+        var assetExists = await _context.Artwork
+            .AnyAsync(artwork => artwork.Asset_Num == dto.Asset_Num);
+
+        if (assetExists)
+        {
+            throw new Exception("Asset_Num must be unique");
+        }
+
         var artwork = new Artwork
         {
             Asset_Num = dto.Asset_Num,
