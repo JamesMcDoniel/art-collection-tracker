@@ -30,9 +30,32 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Models\resnet50-v1-7.onnx">
+    <None Include="database.db" Condition="Exists('database.db')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Models\resnet50-v1-7.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <FrontendDir>$(MSBuildProjectDirectory)\..\frontend</FrontendDir>
+  </PropertyGroup>
+
+  <Target Name="BuildReact" AfterTargets="Publish">
+    <Exec Command="npm ci" WorkingDirectory="$(FrontendDir)" />
+    <Exec Command="npm run build" WorkingDirectory="$(FrontendDir)" />
+
+    <ItemGroup>
+      <ReactBuildFiles Include="$(FrontendDir)\dist\**\*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(ReactBuildFiles)" DestinationFolder="$(PublishDir)\wwwroot\%(RecursiveDir)" />
+  </Target>
 
 </Project>

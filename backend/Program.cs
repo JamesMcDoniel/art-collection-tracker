@@ -108,8 +108,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Will be used eventually to serve built React frontend
-// app.UseDefaultFiles();
+app.UseDefaultFiles();
 app.UseStaticFiles();
-// app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("index.html");
 
 app.Run();

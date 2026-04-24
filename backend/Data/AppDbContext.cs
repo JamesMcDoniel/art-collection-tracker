@@ -244,11 +244,9 @@ namespace backend.Data
             // Let the original Save go through
             var result = await base.SaveChangesAsync(ct);
 
-            if (_env?.WebRootPath != null)
-            {
-                var imagesFolder = Path.Combine(_env.WebRootPath, "uploads");
-                DeleteFiles(imagesFolder, imagesToDelete);
-            }
+
+            var imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            DeleteFiles(imagesFolder, imagesToDelete);
 
             var reportsFolder = Path.Combine(Directory.GetCurrentDirectory(), "reports");
             DeleteFiles(reportsFolder, reportsToDelete);
